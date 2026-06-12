@@ -17,5 +17,8 @@
   <ItemGroup>
     <Using Remove="System.Windows.Forms" />
     <Using Remove="System.Drawing" />
+    <!-- O SDK WindowsDesktop não inclui estes nos usings implícitos (o SDK base sim). -->
+    <Using Include="System.IO" />
+    <Using Include="System.Net.Http" />
   </ItemGroup>
 </Project>
