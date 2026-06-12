@@ -1,0 +1,9 @@
+# Normaliza fins de linha de forma determinística entre máquinas.
+* text=auto
+*.cs text
+*.xaml text
+*.csproj text
+*.slnx text
+*.manifest text
+*.ps1 text
+*.md text
