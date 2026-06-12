@@ -31,20 +31,27 @@
           </ContentControl.Style>
         </ContentControl>
 
-        <TextBlock Foreground="#E8A23D" FontSize="10.5" Margin="0,8,0,0"
-                   HorizontalAlignment="Center">
+        <TextBlock FontSize="10.5" Margin="0,8,0,0" HorizontalAlignment="Center">
           <TextBlock.Style>
             <Style TargetType="TextBlock">
-              <Setter Property="Visibility" Value="Collapsed"/>
+              <!-- sempre visível: cinza discreto em operação normal -->
+              <Setter Property="Foreground" Value="#8CFFFFFF"/>
               <Setter Property="Text">
                 <Setter.Value>
                   <Binding Path="Snapshot.CollectedAt" Converter="{StaticResource LocalHhmm}"
-                           StringFormat="⚠ atualizado às {0}"/>
+                           StringFormat="atualizado às {0}"/>
                 </Setter.Value>
               </Setter>
               <Style.Triggers>
+                <!-- dado velho: vira âmbar com aviso -->
                 <DataTrigger Binding="{Binding Snapshot.State}" Value="Stale">
-                  <Setter Property="Visibility" Value="Visible"/>
+                  <Setter Property="Foreground" Value="#E8A23D"/>
+                  <Setter Property="Text">
+                    <Setter.Value>
+                      <Binding Path="Snapshot.CollectedAt" Converter="{StaticResource LocalHhmm}"
+                               StringFormat="⚠ atualizado às {0}"/>
+                    </Setter.Value>
+                  </Setter>
                 </DataTrigger>
               </Style.Triggers>
             </Style>
