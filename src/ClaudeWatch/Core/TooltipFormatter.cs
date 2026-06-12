@@ -6,7 +6,7 @@ public static class TooltipFormatter
     {
         var reset = s.FiveHour.ResetAt is { } r
             ? $" (reset {(local ? r.ToLocalTime() : r):HH:mm})" : "";
-        var text = $"5h {s.FiveHour.Pct}%{reset} · Sem {s.Week.Pct}% · Opus {s.Opus.Pct}%";
+        var text = $"5h {s.FiveHour.Pct}%{reset} · Sem {s.Week.Pct}% · Sonnet {s.Sonnet.Pct}%";
         return text.Length <= 127 ? text : text[..127];
     }
 }

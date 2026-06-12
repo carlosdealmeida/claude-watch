@@ -42,5 +42,5 @@ public sealed class UsagePoller(
 
     private static UsageSnapshot Empty() => new(
         new Meter("Sessão 5h", 0, null), new Meter("Semana", 0, null),
-        new Meter("Opus", 0, null), DateTimeOffset.UtcNow, SnapshotState.Stale);
+        new Meter("Sonnet", 0, null), DateTimeOffset.UtcNow, SnapshotState.Stale);
 }

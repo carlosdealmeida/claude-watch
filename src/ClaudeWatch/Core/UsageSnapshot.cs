@@ -8,8 +8,8 @@ public sealed record Meter(string Label, int Pct, DateTimeOffset? ResetAt)
 }
 
 public sealed record UsageSnapshot(
-    Meter FiveHour, Meter Week, Meter Opus,
+    Meter FiveHour, Meter Week, Meter Sonnet,
     DateTimeOffset CollectedAt, SnapshotState State)
 {
-    public Meter Worst => new[] { FiveHour, Week, Opus }.MaxBy(m => m.Pct)!;
+    public Meter Worst => new[] { FiveHour, Week, Sonnet }.MaxBy(m => m.Pct)!;
 }

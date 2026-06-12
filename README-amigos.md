@@ -1,7 +1,7 @@
 # ClaudeWatch — guia rápido
 
 Um widget de mesa que mostra o quanto você já gastou da sua assinatura do Claude:
-**sessão de 5h**, **semana** e **Opus semanal** — num cartão flutuante sempre visível
+**sessão de 5h**, **semana** e **Sonnet semanal** — num cartão flutuante sempre visível
 e num ícone ao lado do relógio.
 
 ## Requisitos

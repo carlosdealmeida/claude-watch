@@ -27,7 +27,7 @@
     <StackPanel Orientation="Horizontal" Width="236">
       <ContentControl Content="{Binding Snapshot.FiveHour}" ContentTemplate="{StaticResource MeterRing}"/>
       <ContentControl Content="{Binding Snapshot.Week}" ContentTemplate="{StaticResource MeterRing}"/>
-      <ContentControl Content="{Binding Snapshot.Opus}" ContentTemplate="{StaticResource MeterRing}"/>
+      <ContentControl Content="{Binding Snapshot.Sonnet}" ContentTemplate="{StaticResource MeterRing}"/>
     </StackPanel>
   </DataTemplate>
 
@@ -82,7 +82,7 @@
     <StackPanel>
       <ContentControl Content="{Binding Snapshot.FiveHour}" ContentTemplate="{StaticResource LedRow}"/>
       <ContentControl Content="{Binding Snapshot.Week}" ContentTemplate="{StaticResource LedRow}"/>
-      <ContentControl Content="{Binding Snapshot.Opus}" ContentTemplate="{StaticResource LedRow}"/>
+      <ContentControl Content="{Binding Snapshot.Sonnet}" ContentTemplate="{StaticResource LedRow}"/>
     </StackPanel>
   </DataTemplate>
 </ResourceDictionary>

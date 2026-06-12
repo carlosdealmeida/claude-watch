@@ -1,7 +1,7 @@
 # ClaudeWatch
 
 Widget de mesa para Windows (WPF) — sempre visível + ícone de tray — que mostra o
-consumo da assinatura Claude (**sessão 5h**, **semana**, **Opus semanal**), lendo as
+consumo da assinatura Claude (**sessão 5h**, **semana**, **Sonnet semanal**), lendo as
 credenciais do **Claude Code oficial**. Processo único, distribuível como um `.exe`.
 
 > Para usuários finais, veja **[README-amigos.md](README-amigos.md)**.

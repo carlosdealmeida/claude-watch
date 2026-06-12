@@ -6,7 +6,7 @@ public static class UsageResponseParser
 {
     // Shape do endpoint api.anthropic.com/api/oauth/usage (Claude Code CLI):
     // cada bucket é { utilization: num|null, resets_at: ISO|null } ou o bucket inteiro é null
-    // (cota inativa no plano — ex.: seven_day_opus em planos sem Opus).
+    // (cota inativa no plano — ex.: seven_day_sonnet/opus podem vir null).
     public static UsageSnapshot Parse(string json, DateTimeOffset now)
     {
         var n = JsonNode.Parse(json)!;
@@ -23,6 +23,6 @@ public static class UsageResponseParser
         }
 
         return new UsageSnapshot(M("five_hour", "Sessão 5h"), M("seven_day", "Semana"),
-            M("seven_day_opus", "Opus"), now, SnapshotState.Ok);
+            M("seven_day_sonnet", "Sonnet"), now, SnapshotState.Ok);
     }
 }

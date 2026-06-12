@@ -13,13 +13,13 @@ public class ZoneRulesTests
     public void Worst_e_o_maior_percentual()
     {
         var s = Snapshots.Of(42, 78, 96);
-        Assert.Equal("Opus", s.Worst.Label);
+        Assert.Equal("Sonnet", s.Worst.Label);
     }
 }
 
 public static class Snapshots
 {
-    public static UsageSnapshot Of(int h5, int sem, int opus, SnapshotState st = SnapshotState.Ok) =>
+    public static UsageSnapshot Of(int h5, int sem, int sonnet, SnapshotState st = SnapshotState.Ok) =>
         new(new Meter("Sessão 5h", h5, null), new Meter("Semana", sem, null),
-            new Meter("Opus", opus, null), DateTimeOffset.UtcNow, st);
+            new Meter("Sonnet", sonnet, null), DateTimeOffset.UtcNow, st);
 }

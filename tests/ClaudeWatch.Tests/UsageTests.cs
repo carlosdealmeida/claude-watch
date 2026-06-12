@@ -11,8 +11,8 @@ public class UsageTests
     {"five_hour":{"utilization":42.4,"resets_at":"2026-06-11T15:00:00Z"},
      "seven_day":{"utilization":78.0,"resets_at":"2026-06-18T09:00:00Z"},
      "seven_day_oauth_apps":null,
-     "seven_day_opus":{"utilization":96.0,"resets_at":"2026-06-18T09:00:00Z"},
-     "seven_day_sonnet":{"utilization":10.0,"resets_at":"2026-06-18T09:00:00Z"},
+     "seven_day_opus":null,
+     "seven_day_sonnet":{"utilization":96.0,"resets_at":"2026-06-18T09:00:00Z"},
      "extra_usage":{"is_enabled":false,"monthly_limit":null,"used_credits":null,"utilization":null,"currency":null}}
     """;
 
@@ -20,7 +20,7 @@ public class UsageTests
     public void Parser_mapeia_os_tres_medidores()
     {
         var s = UsageResponseParser.Parse(Fixture, DateTimeOffset.UnixEpoch);
-        Assert.Equal((42, 78, 96), (s.FiveHour.Pct, s.Week.Pct, s.Opus.Pct));
+        Assert.Equal((42, 78, 96), (s.FiveHour.Pct, s.Week.Pct, s.Sonnet.Pct));
         Assert.Equal(SnapshotState.Ok, s.State);
         Assert.NotNull(s.FiveHour.ResetAt);
     }
@@ -31,12 +31,12 @@ public class UsageTests
         const string json = """
         {"five_hour":{"utilization":42.0,"resets_at":"2026-06-11T15:00:00Z"},
          "seven_day":null,
-         "seven_day_opus":{"utilization":null,"resets_at":null}}
+         "seven_day_sonnet":{"utilization":null,"resets_at":null}}
         """;
         var s = UsageResponseParser.Parse(json, DateTimeOffset.UnixEpoch);
-        Assert.Equal((42, 0, 0), (s.FiveHour.Pct, s.Week.Pct, s.Opus.Pct));
+        Assert.Equal((42, 0, 0), (s.FiveHour.Pct, s.Week.Pct, s.Sonnet.Pct));
         Assert.Null(s.Week.ResetAt);
-        Assert.Null(s.Opus.ResetAt);
+        Assert.Null(s.Sonnet.ResetAt);
     }
 
     [Fact]
@@ -53,6 +53,6 @@ public class UsageTests
         var s = await new UsageClient(new HttpClient(handler)).FetchAsync("AT", default);
         Assert.Equal("Bearer", handler.LastRequest!.Headers.Authorization!.Scheme);
         Assert.Equal("oauth-2025-04-20", handler.LastRequest!.Headers.GetValues("anthropic-beta").Single());
-        Assert.Equal(96, s.Opus.Pct);
+        Assert.Equal(96, s.Sonnet.Pct);
     }
 }

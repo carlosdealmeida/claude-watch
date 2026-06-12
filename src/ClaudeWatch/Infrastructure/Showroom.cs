@@ -21,6 +21,6 @@ public static class Showroom
     private static UsageSnapshot Demo(SnapshotState state) => new(
         new Meter("Sessão 5h", 42, DateTimeOffset.Now.AddHours(2)),
         new Meter("Semana", 78, DateTimeOffset.Now.AddDays(3)),
-        new Meter("Opus", 96, DateTimeOffset.Now.AddDays(3)),
+        new Meter("Sonnet", 96, DateTimeOffset.Now.AddDays(3)),
         DateTimeOffset.UtcNow, state);
 }
