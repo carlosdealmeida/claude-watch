@@ -32,4 +32,14 @@ public class OAuthRefreshClientTests
         Assert.True(r.Rejected);
         Assert.Null(r.Credential);
     }
+
+    [Fact]
+    public async Task Envia_form_urlencoded_com_client_id()
+    {
+        var handler = new FakeHttpHandler(HttpStatusCode.OK, """{"access_token":"NEW","expires_in":3600}""");
+        await new OAuthRefreshClient(new HttpClient(handler)).RefreshAsync("RT", default);
+        Assert.Equal("application/x-www-form-urlencoded", handler.LastContentType);
+        Assert.Contains("grant_type=refresh_token", handler.LastBody);
+        Assert.Contains("client_id=9d1c250a", handler.LastBody);
+    }
 }

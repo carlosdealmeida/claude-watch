@@ -11,6 +11,9 @@ public sealed class UsageClient(HttpClient http)
     {
         using var req = new HttpRequestMessage(HttpMethod.Get, OAuthConstants.UsageEndpoint);
         req.Headers.Authorization = new("Bearer", accessToken);
+        // anthropic-beta é obrigatório no endpoint OAuth; User-Agent evita bloqueio do Cloudflare.
+        req.Headers.TryAddWithoutValidation("anthropic-beta", OAuthConstants.BetaHeader);
+        req.Headers.TryAddWithoutValidation("User-Agent", OAuthConstants.UserAgent);
         using var resp = await http.SendAsync(req, ct);
         if (resp.StatusCode == HttpStatusCode.Unauthorized) throw new UnauthorizedException();
         resp.EnsureSuccessStatusCode();

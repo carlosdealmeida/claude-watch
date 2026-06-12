@@ -5,11 +5,15 @@ using Xunit;
 
 public class UsageTests
 {
-    // TODO(carlos): substituir pelo shape real do parity e ajustar o parser.
+    // Shape real do endpoint api.anthropic.com/api/oauth/usage (fixture do ATLAS):
+    // buckets podem ser null (cota inativa no plano) e há buckets extras ignorados.
     private const string Fixture = """
     {"five_hour":{"utilization":42.4,"resets_at":"2026-06-11T15:00:00Z"},
      "seven_day":{"utilization":78.0,"resets_at":"2026-06-18T09:00:00Z"},
-     "seven_day_opus":{"utilization":96.0,"resets_at":"2026-06-18T09:00:00Z"}}
+     "seven_day_oauth_apps":null,
+     "seven_day_opus":{"utilization":96.0,"resets_at":"2026-06-18T09:00:00Z"},
+     "seven_day_sonnet":{"utilization":10.0,"resets_at":"2026-06-18T09:00:00Z"},
+     "extra_usage":{"is_enabled":false,"monthly_limit":null,"used_credits":null,"utilization":null,"currency":null}}
     """;
 
     [Fact]
@@ -22,6 +26,20 @@ public class UsageTests
     }
 
     [Fact]
+    public void Bucket_nulo_ou_sem_utilization_vira_zero()
+    {
+        const string json = """
+        {"five_hour":{"utilization":42.0,"resets_at":"2026-06-11T15:00:00Z"},
+         "seven_day":null,
+         "seven_day_opus":{"utilization":null,"resets_at":null}}
+        """;
+        var s = UsageResponseParser.Parse(json, DateTimeOffset.UnixEpoch);
+        Assert.Equal((42, 0, 0), (s.FiveHour.Pct, s.Week.Pct, s.Opus.Pct));
+        Assert.Null(s.Week.ResetAt);
+        Assert.Null(s.Opus.ResetAt);
+    }
+
+    [Fact]
     public async Task Quatrocentos_e_um_vira_UnauthorizedException()
     {
         var client = new UsageClient(new HttpClient(new FakeHttpHandler(HttpStatusCode.Unauthorized, "")));
@@ -29,11 +47,12 @@ public class UsageTests
     }
 
     [Fact]
-    public async Task Sucesso_envia_bearer_e_parseia()
+    public async Task Sucesso_envia_bearer_e_beta_e_parseia()
     {
         var handler = new FakeHttpHandler(HttpStatusCode.OK, Fixture);
         var s = await new UsageClient(new HttpClient(handler)).FetchAsync("AT", default);
         Assert.Equal("Bearer", handler.LastRequest!.Headers.Authorization!.Scheme);
+        Assert.Equal("oauth-2025-04-20", handler.LastRequest!.Headers.GetValues("anthropic-beta").Single());
         Assert.Equal(96, s.Opus.Pct);
     }
 }

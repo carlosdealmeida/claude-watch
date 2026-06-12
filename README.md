@@ -13,9 +13,12 @@ credenciais do **Claude Code oficial**. Processo único, distribuível como um `
   usage, poller).
 - ✅ UI completa — widget glass topmost, dois skins (Anéis/LED), tray com ícone GDI
   dinâmico, estados Stale/NoCredential, single-instance, autostart.
-- ⏳ **Runtime real bloqueado por 4 `TODO(carlos)`** (endpoints/ids do OAuth e shape de
-  usage do parity do CORTEX) — ver **[docs/TODO-carlos.md](docs/TODO-carlos.md)**.
-  Sem eles o app sobe, mostra a UI, mas o poller fica em `Stale`.
+- ✅ **Endpoints reais preenchidos** (client_id, `platform.claude.com/v1/oauth/token`,
+  `api.anthropic.com/api/oauth/usage`, grant form-urlencoded, headers `anthropic-beta`) —
+  da fonte primária (Claude Code CLI descompilado em `claude-code-dotnet`/ATLAS). Ver
+  **[docs/TODO-carlos.md](docs/TODO-carlos.md)**.
+- ⏳ Falta apenas o **smoke contra a API real** (chamada autenticada com o token do
+  Claude Code logado) para confirmar o 200 e os três medidores ao vivo.
 
 ## Arquitetura
 

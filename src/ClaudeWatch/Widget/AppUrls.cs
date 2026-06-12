@@ -2,6 +2,7 @@ namespace ClaudeWatch.Widget;
 
 public static class AppUrls
 {
-    // TODO(carlos): confirmar a URL exata da página de login/conta do Claude Code.
+    // Página de login do Claude (mesma usada pelo fluxo OAuth do Claude Code).
+    // O login efetivo do CLI também pode ser refeito com `claude` no terminal.
     public const string ClaudeCode = "https://claude.ai/login";
 }
