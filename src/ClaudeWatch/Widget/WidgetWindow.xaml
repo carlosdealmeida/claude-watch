@@ -10,6 +10,69 @@
     <Border.Effect>
       <DropShadowEffect BlurRadius="34" ShadowDepth="6" Direction="270" Opacity="0.4"/>
     </Border.Effect>
-    <ContentControl x:Name="Body"/>
+
+    <Grid MinWidth="236">
+      <!-- Corpo (skins) + rodapé de estado Stale -->
+      <StackPanel>
+        <ContentControl x:Name="Body" Content="{Binding}">
+          <ContentControl.Style>
+            <Style TargetType="ContentControl">
+              <Setter Property="ContentTemplate" Value="{StaticResource SkinAneis}"/>
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding Skin}" Value="Led">
+                  <Setter Property="ContentTemplate" Value="{StaticResource SkinLed}"/>
+                </DataTrigger>
+                <!-- aproximação consciente do grayscale CSS: esmaecer quando Stale -->
+                <DataTrigger Binding="{Binding Snapshot.State}" Value="Stale">
+                  <Setter Property="Opacity" Value="0.55"/>
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </ContentControl.Style>
+        </ContentControl>
+
+        <TextBlock Foreground="#E8A23D" FontSize="10.5" Margin="0,8,0,0"
+                   HorizontalAlignment="Center">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock">
+              <Setter Property="Visibility" Value="Collapsed"/>
+              <Setter Property="Text">
+                <Setter.Value>
+                  <Binding Path="Snapshot.CollectedAt" Converter="{StaticResource LocalHhmm}"
+                           StringFormat="⚠ atualizado às {0}"/>
+                </Setter.Value>
+              </Setter>
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding Snapshot.State}" Value="Stale">
+                  <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
+      </StackPanel>
+
+      <!-- Painel NoCredential: cobre o corpo -->
+      <Border Background="#E61E1E1E" CornerRadius="8" Padding="18,16">
+        <Border.Style>
+          <Style TargetType="Border">
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding Snapshot.State}" Value="NoCredential">
+                <Setter Property="Visibility" Value="Visible"/>
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </Border.Style>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+          <TextBlock Text="🔒" FontSize="22" HorizontalAlignment="Center"/>
+          <TextBlock Text="Faça login no Claude Code" Foreground="White" FontSize="12"
+                     Margin="0,6,0,0" HorizontalAlignment="Center"/>
+          <Button Content="Conectar conta" Click="OnConnectAccount" Margin="0,12,0,0"
+                  Padding="14,6" Cursor="Hand" HorizontalAlignment="Center"
+                  Foreground="White" Background="#2F6FEB" BorderThickness="0"/>
+        </StackPanel>
+      </Border>
+    </Grid>
   </Border>
 </Window>

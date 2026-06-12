@@ -14,10 +14,23 @@ public partial class App : Application
     private WidgetWindow? _window;
     private FileCredentialFile? _credFile;
     private CancellationTokenSource? _cts;
+    private Mutex? _mutex;
+    private EventWaitHandle? _showSignal;
 
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        _mutex = new Mutex(true, @"Global\ClaudeWatch.Widget", out var first);
+        _showSignal = new EventWaitHandle(false, EventResetMode.AutoReset, @"Global\ClaudeWatch.Show");
+        if (!first) { _showSignal.Set(); Shutdown(); return; }
+        var showThread = new Thread(() =>
+        {
+            while (_showSignal.WaitOne())
+                Dispatcher.Invoke(() => { _window?.Show(); _window?.Activate(); });
+        }) { IsBackground = true };
+        showThread.Start();
+
         var log = new FileLogger(AppPaths.LogsDir);
         var store = new SettingsStore(AppPaths.BaseDir);
         var settings = store.Load();
@@ -33,9 +46,12 @@ public partial class App : Application
         _window = new WidgetWindow(store, settings) { DataContext = vm };
         _tray = new TrayController(settings.Locked, Autostart.IsEnabled(), settings.Skin);
 
+        var demo = Showroom.Mode is not null;
         var poller = new UsagePoller(
-            getToken: ct => pipeline.GetAccessTokenAsync(DateTimeOffset.UtcNow, ct),
-            fetch: usage.FetchAsync,
+            getToken: demo ? _ => Task.FromResult<string?>("demo")
+                           : ct => pipeline.GetAccessTokenAsync(DateTimeOffset.UtcNow, ct),
+            fetch: demo ? (_, _) => Task.FromResult(Showroom.Snapshot())
+                        : usage.FetchAsync,
             publish: s => Dispatcher.Invoke(() =>
             { vm.Snapshot = s; _tray.Update(s); _window.ReassertTopmost(); }),
             log: log.Log);
@@ -59,6 +75,7 @@ public partial class App : Application
     protected override void OnExit(ExitEventArgs e)
     {
         _cts?.Cancel(); _tray?.Dispose(); _credFile?.Dispose();
+        _showSignal?.Dispose(); _mutex?.Dispose();
         base.OnExit(e);
     }
 }

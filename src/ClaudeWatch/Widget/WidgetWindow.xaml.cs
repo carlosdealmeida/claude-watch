@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
 using ClaudeWatch.Infrastructure;
@@ -24,6 +25,12 @@ public partial class WidgetWindow : Window
 
     public void SetLocked(bool locked)
     { _locked = locked; WindowInterop.SetClickThrough(this, locked); }
+
+    private void OnConnectAccount(object sender, RoutedEventArgs e)
+    {
+        try { Process.Start(new ProcessStartInfo(AppUrls.ClaudeCode) { UseShellExecute = true }); }
+        catch { /* sem navegador ou URL inválida: não derruba o widget */ }
+    }
 
     public void ReassertTopmost() { Topmost = false; Topmost = true; }
 

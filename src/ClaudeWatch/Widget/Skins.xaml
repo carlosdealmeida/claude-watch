@@ -1,0 +1,88 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:w="clr-namespace:ClaudeWatch.Widget">
+  <w:PctToBrushConverter x:Key="PctBrush"/>
+  <w:PctToRingGeometryConverter x:Key="PctRing"/>
+  <w:LedSegmentsConverter x:Key="LedSegs"/>
+  <w:LocalHhmmConverter x:Key="LocalHhmm"/>
+
+  <!-- Skin A — um anel -->
+  <DataTemplate x:Key="MeterRing">
+    <StackPanel Width="76" HorizontalAlignment="Center">
+      <Grid Width="56" Height="56" HorizontalAlignment="Center">
+        <Ellipse Stroke="#24FFFFFF" StrokeThickness="6" Margin="3"/>
+        <Path Stroke="{Binding Pct, Converter={StaticResource PctBrush}}"
+              StrokeThickness="6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+              Data="{Binding Pct, Converter={StaticResource PctRing}}"/>
+        <TextBlock Text="{Binding Pct, StringFormat={}{0}%}" Foreground="White"
+                   FontFamily="Segoe UI" FontSize="14" FontWeight="SemiBold"
+                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+      </Grid>
+      <TextBlock Text="{Binding Label}" Foreground="#BDFFFFFF" FontSize="10.5"
+                 HorizontalAlignment="Center" Margin="0,7,0,0"/>
+    </StackPanel>
+  </DataTemplate>
+
+  <DataTemplate x:Key="SkinAneis">
+    <StackPanel Orientation="Horizontal" Width="236">
+      <ContentControl Content="{Binding Snapshot.FiveHour}" ContentTemplate="{StaticResource MeterRing}"/>
+      <ContentControl Content="{Binding Snapshot.Week}" ContentTemplate="{StaticResource MeterRing}"/>
+      <ContentControl Content="{Binding Snapshot.Opus}" ContentTemplate="{StaticResource MeterRing}"/>
+    </StackPanel>
+  </DataTemplate>
+
+  <!-- Skin E — LED/equalizador -->
+  <DataTemplate x:Key="LedRow">
+    <Grid Margin="0,6" Width="240">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="48"/><ColumnDefinition Width="*"/><ColumnDefinition Width="30"/>
+      </Grid.ColumnDefinitions>
+      <TextBlock Text="{Binding Label}" Foreground="#C7FFFFFF" FontSize="10.5" VerticalAlignment="Center"/>
+      <ItemsControl Grid.Column="1" ItemsSource="{Binding Pct, Converter={StaticResource LedSegs}}"
+                    VerticalAlignment="Center">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate><UniformGrid Rows="1" /></ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <Border Height="11" Margin="1.5,0" CornerRadius="1.5" x:Name="Seg" Background="#1AFFFFFF"/>
+            <DataTemplate.Triggers>
+              <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                  <Condition Binding="{Binding Lit}" Value="True"/>
+                  <Condition Binding="{Binding Zone}" Value="Verde"/>
+                </MultiDataTrigger.Conditions>
+                <Setter TargetName="Seg" Property="Background" Value="#3FB950"/>
+              </MultiDataTrigger>
+              <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                  <Condition Binding="{Binding Lit}" Value="True"/>
+                  <Condition Binding="{Binding Zone}" Value="Ambar"/>
+                </MultiDataTrigger.Conditions>
+                <Setter TargetName="Seg" Property="Background" Value="#E8A23D"/>
+              </MultiDataTrigger>
+              <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                  <Condition Binding="{Binding Lit}" Value="True"/>
+                  <Condition Binding="{Binding Zone}" Value="Vermelho"/>
+                </MultiDataTrigger.Conditions>
+                <Setter TargetName="Seg" Property="Background" Value="#F85149"/>
+              </MultiDataTrigger>
+            </DataTemplate.Triggers>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+      <TextBlock Grid.Column="2" Text="{Binding Pct, StringFormat={}{0}%}" FontSize="11"
+                 FontWeight="SemiBold" TextAlignment="Right" VerticalAlignment="Center"
+                 Foreground="{Binding Pct, Converter={StaticResource PctBrush}}"/>
+    </Grid>
+  </DataTemplate>
+
+  <DataTemplate x:Key="SkinLed">
+    <StackPanel>
+      <ContentControl Content="{Binding Snapshot.FiveHour}" ContentTemplate="{StaticResource LedRow}"/>
+      <ContentControl Content="{Binding Snapshot.Week}" ContentTemplate="{StaticResource LedRow}"/>
+      <ContentControl Content="{Binding Snapshot.Opus}" ContentTemplate="{StaticResource LedRow}"/>
+    </StackPanel>
+  </DataTemplate>
+</ResourceDictionary>
