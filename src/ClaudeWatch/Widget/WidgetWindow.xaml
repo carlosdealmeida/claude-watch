@@ -57,6 +57,11 @@
             </Style>
           </TextBlock.Style>
         </TextBlock>
+
+        <TextBlock Text="{Binding UpdateLabel}" Foreground="#4C9AFF" FontSize="10.5"
+                   Margin="0,4,0,0" HorizontalAlignment="Center" Cursor="Hand"
+                   MouseLeftButtonUp="OnUpdateClick"
+                   Visibility="{Binding UpdateAvailable, Converter={StaticResource BoolToVis}}"/>
       </StackPanel>
 
       <!-- Painel NoCredential: cobre o corpo -->

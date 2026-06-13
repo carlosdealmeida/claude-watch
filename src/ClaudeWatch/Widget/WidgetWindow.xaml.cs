@@ -32,6 +32,13 @@ public partial class WidgetWindow : Window
         catch { /* sem navegador ou URL inválida: não derruba o widget */ }
     }
 
+    private void OnUpdateClick(object sender, MouseButtonEventArgs e)
+    {
+        if (DataContext is WidgetViewModel { UpdateUrl: { } url })
+            try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); }
+            catch { /* sem navegador: ignora */ }
+    }
+
     public void ReassertTopmost() { Topmost = false; Topmost = true; }
 
     private void OnDragStart(object sender, MouseButtonEventArgs e)

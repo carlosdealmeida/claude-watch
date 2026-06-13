@@ -5,6 +5,7 @@
   <w:PctToRingGeometryConverter x:Key="PctRing"/>
   <w:LedSegmentsConverter x:Key="LedSegs"/>
   <w:LocalHhmmConverter x:Key="LocalHhmm"/>
+  <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
   <!-- Skin A — um anel -->
   <DataTemplate x:Key="MeterRing">
