@@ -70,6 +70,20 @@ public partial class App : Application
 
         _window.Show();
         _ = poller.RunAsync(TimeSpan.FromSeconds(Math.Max(15, settings.IntervalSeconds)), _cts.Token);
+
+        var updateService = new UpdateService(
+            AppVersion.Current,
+            new GitHubReleaseClient(http),
+            publish: s => Dispatcher.Invoke(() =>
+            {
+                if (!s.Available) return;
+                _tray!.ShowUpdate(s.LatestVersion!, s.Url!);
+                vm.UpdateAvailable = true;
+                vm.UpdateLabel = $"⬆ v{s.LatestVersion} disponível";
+                vm.UpdateUrl = s.Url;
+            }),
+            log: log.Log);
+        _ = updateService.RunAsync(TimeSpan.FromSeconds(10), TimeSpan.FromHours(6), _cts.Token);
     }
 
     protected override void OnExit(ExitEventArgs e)
