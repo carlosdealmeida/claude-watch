@@ -17,13 +17,13 @@
   <img alt="Windows" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D6?logo=windows&logoColor=white">
 </p>
 
-<!--
-Depois de gerar as imagens (assets/aneis.png e assets/led.png), descomente:
 <p align="center">
-  <img src="assets/aneis.png" alt="Skin Anéis" width="320">
-  <img src="assets/led.png" alt="Skin LED" width="320">
+  <img src="assets/aneis.png" alt="Skin Anéis" width="330">
+  &nbsp;&nbsp;
+  <img src="assets/led.png" alt="Skin LED" width="330">
 </p>
--->
+
+<p align="center"><sub>Os dois estilos: <b>Anéis</b> e <b>LED</b> · 🟢 &lt;70% · 🟠 70–89% · 🔴 ≥90%</sub></p>
 
 O **ClaudeWatch** mostra, em tempo real e de relance, quanto você já usou dos seus limites do Claude:
 
