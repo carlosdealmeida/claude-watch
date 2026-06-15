@@ -31,6 +31,12 @@
           </ContentControl.Style>
         </ContentControl>
 
+        <!-- Reset da sessão de 5h: some quando não há ResetAt -->
+        <TextBlock FontSize="10.5" Margin="0,8,0,0" HorizontalAlignment="Center"
+                   Foreground="#8CFFFFFF"
+                   Text="{Binding Snapshot.FiveHour.ResetAt, Converter={StaticResource LocalHhmm}, StringFormat='↻ reseta às {0}'}"
+                   Visibility="{Binding Snapshot.FiveHour.ResetAt, Converter={StaticResource NullToCollapsed}}"/>
+
         <TextBlock FontSize="10.5" Margin="0,8,0,0" HorizontalAlignment="Center">
           <TextBlock.Style>
             <Style TargetType="TextBlock">

@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
 using ClaudeWatch.Core;
@@ -43,5 +44,12 @@ public sealed class LocalHhmmConverter : IValueConverter
 {
     public object Convert(object v, Type t, object p, CultureInfo c) =>
         v is DateTimeOffset d ? d.ToLocalTime().ToString("HH:mm", c) : "";
+    public object ConvertBack(object v, Type t, object p, CultureInfo c) => throw new NotSupportedException();
+}
+
+public sealed class NullToCollapsedConverter : IValueConverter
+{
+    public object Convert(object v, Type t, object p, CultureInfo c) =>
+        v is null ? Visibility.Collapsed : Visibility.Visible;
     public object ConvertBack(object v, Type t, object p, CultureInfo c) => throw new NotSupportedException();
 }

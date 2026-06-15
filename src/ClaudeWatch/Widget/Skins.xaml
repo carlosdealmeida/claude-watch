@@ -5,6 +5,7 @@
   <w:PctToRingGeometryConverter x:Key="PctRing"/>
   <w:LedSegmentsConverter x:Key="LedSegs"/>
   <w:LocalHhmmConverter x:Key="LocalHhmm"/>
+  <w:NullToCollapsedConverter x:Key="NullToCollapsed"/>
   <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
   <!-- Skin A — um anel -->
