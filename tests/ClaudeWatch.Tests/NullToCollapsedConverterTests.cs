@@ -16,4 +16,8 @@ public class NullToCollapsedConverterTests
     public void Data_fica_visivel() =>
         Assert.Equal(Visibility.Visible,
             Conv(new DateTimeOffset(2026, 6, 11, 15, 0, 0, TimeSpan.Zero)));
+
+    [Fact]
+    public void Nao_nulo_qualquer_fica_visivel() => // visível por ser não-nulo, não por ser data
+        Assert.Equal(Visibility.Visible, Conv(42));
 }
