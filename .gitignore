@@ -484,3 +484,6 @@ $RECYCLE.BIN/
 # ClaudeWatch
 .claude/worktrees/
 publish/
+
+# Documentacao interna (nao publicar no GitHub)
+docs/

@@ -18,8 +18,11 @@
 </p>
 
 <!--
-Dica: adicione um screenshot real e referencie aqui, por exemplo:
-<p align="center"><img src="docs/img/claudewatch.png" alt="ClaudeWatch" width="540"></p>
+Depois de gerar as imagens (assets/aneis.png e assets/led.png), descomente:
+<p align="center">
+  <img src="assets/aneis.png" alt="Skin Anéis" width="320">
+  <img src="assets/led.png" alt="Skin LED" width="320">
+</p>
 -->
 
 O **ClaudeWatch** mostra, em tempo real e de relance, quanto você já usou dos seus limites do Claude:
@@ -89,7 +92,7 @@ A cada algumas horas o app verifica se há versão nova e avisa pelo ícone do t
 
 ## 🛠️ Para desenvolvedores
 
-Feito com **.NET 10 + WPF**. Veja **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)** para compilar, testar, publicar e lançar releases.
+Feito com **.NET 10 + WPF**. Compile com `dotnet build ClaudeWatch.slnx` e rode os testes com `dotnet test ClaudeWatch.slnx`.
 
 ---
 
