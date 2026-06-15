@@ -1,76 +1,96 @@
-# ClaudeWatch
+<h1 align="center">🟢 ClaudeWatch</h1>
 
-Widget de mesa para Windows (WPF) — sempre visível + ícone de tray — que mostra o
-consumo da assinatura Claude (**sessão 5h**, **semana**, **Sonnet semanal**), lendo as
-credenciais do **Claude Code oficial**. Processo único, distribuível como um `.exe`.
+<p align="center">
+  <b>Português</b> ·
+  <a href="README.en.md">English</a> ·
+  <a href="README.es.md">Español</a>
+</p>
 
-> Para usuários finais, veja **[README-amigos.md](README-amigos.md)**.
+<p align="center">
+  <em>Acompanhe o consumo da sua assinatura <b>Claude</b> sem sair do que está fazendo —<br>
+  um widget discreto, sempre à vista, no seu desktop Windows.</em>
+</p>
 
-## Status
+<p align="center">
+  <img alt="versão" src="https://img.shields.io/github/v/release/carlosdealmeida/claude-watch?label=vers%C3%A3o&color=3FB950">
+  <img alt="downloads" src="https://img.shields.io/github/downloads/carlosdealmeida/claude-watch/total?label=downloads&color=4C9AFF">
+  <img alt="Windows" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D6?logo=windows&logoColor=white">
+</p>
 
-- ✅ Núcleo testável completo — **43 testes xUnit** verdes (zonas, snapshot, LED,
-  tooltip, backoff, settings, parser/seleção/cache/refresh de credenciais, pipeline,
-  usage, poller).
-- ✅ UI completa — widget glass topmost, dois skins (Anéis/LED), tray com ícone GDI
-  dinâmico, estados Stale/NoCredential, single-instance, autostart.
-- ✅ **Endpoints reais preenchidos** (client_id, `platform.claude.com/v1/oauth/token`,
-  `api.anthropic.com/api/oauth/usage`, grant form-urlencoded, headers `anthropic-beta`) —
-  da fonte primária (Claude Code CLI descompilado em `claude-code-dotnet`/ATLAS). Ver
-  **[docs/TODO-carlos.md](docs/TODO-carlos.md)**.
-- ⏳ Falta apenas o **smoke contra a API real** (chamada autenticada com o token do
-  Claude Code logado) para confirmar o 200 e os três medidores ao vivo.
+<!--
+Dica: adicione um screenshot real e referencie aqui, por exemplo:
+<p align="center"><img src="docs/img/claudewatch.png" alt="ClaudeWatch" width="540"></p>
+-->
 
-## Arquitetura
+O **ClaudeWatch** mostra, em tempo real e de relance, quanto você já usou dos seus limites do Claude:
 
-Núcleo puro (`Core/`, `Credentials/`) isolado de UI e I/O por abstrações pequenas.
+- ⏱️ **Sessão de 5 horas**
+- 📅 **Semana**
+- 🧠 **Sonnet semanal**
 
-- **`CredentialPipeline`** lê `~/.claude/.credentials.json` (**read-only, invariante
-  absoluta — nunca escreve no arquivo do Claude Code**), renova com refresh token e
-  cacheia em DPAPI (`token.bin`).
-- **`UsagePoller`** publica um `UsageSnapshot` imutável (estados `Ok` / `Stale` /
-  `NoCredential`) para a janela (dual-skin) e o tray, com backoff 1→2→5 min.
-- **`WidgetWindow`** (WPF borderless topmost) + **`TrayController`** (WinForms NotifyIcon)
-  no mesmo processo.
+…num cartão flutuante elegante e num ícone colorido ao lado do relógio. Ele lê a credencial do **Claude Code** que você já tem instalado — e **nunca a altera**.
 
-Decisões de design: **[docs/2026-06-11-claudewatch-widget-design.md](docs/2026-06-11-claudewatch-widget-design.md)**.
-Plano de implementação task-a-task: **[docs/2026-06-11-claudewatch-implementation.md](docs/2026-06-11-claudewatch-implementation.md)**.
+## ✨ Recursos
 
-## Stack
+- 🎨 Dois estilos: **Anéis** e **LED** — troque com um clique
+- 🔢 Ícone no tray com o medidor mais crítico, na cor da zona
+- 🚦 Cores por nível: 🟢 verde (&lt;70%) · 🟠 âmbar (70–89%) · 🔴 vermelho (≥90%)
+- 📌 Sempre no topo, arrastável, com modo **travado** (clica através, não atrapalha)
+- 🪟 Inicia com o Windows (opcional)
+- 🔔 Avisa quando há uma nova versão
+- 📦 Um único `.exe` — sem instalação, sem runtime
 
-`net10.0-windows` · WPF + WinForms (`UseWPF` + `UseWindowsForms`) · System.Text.Json ·
-DPAPI (`System.Security.Cryptography.ProtectedData`, já no framework) · xUnit.
+## 📥 Instalação
 
-## Desenvolvimento
+1. Baixe o `ClaudeWatch.exe` na **[última release](https://github.com/carlosdealmeida/claude-watch/releases/latest)**.
+2. Dê dois cliques.
+3. Na primeira vez, o Windows mostra um aviso azul (**SmartScreen**) porque o app não é assinado → clique em **"Mais informações" → "Executar assim mesmo"**.
 
-```bash
-dotnet build ClaudeWatch.slnx        # compila (0 warnings)
-dotnet test  ClaudeWatch.slnx        # 43 testes
-```
+> 💡 O Windows 11 esconde ícones novos na setinha `^` perto do relógio. Arraste o do ClaudeWatch para fora se quiser deixá-lo sempre à vista.
 
-### Modo showroom (QA visual sem rede)
+**Requisitos:** Windows 10 ou 11 · **Claude Code** instalado e logado (`claude` no terminal).
 
-Injeta o snapshot canônico 42/78/96 sem chamar a API — útil para inspecionar os skins
-e estados enquanto os `TODO(carlos)` não estão preenchidos:
+## 🖱️ Como usar
 
-```powershell
-$env:CLAUDEWATCH_SHOWROOM = "ok"      # ou "stale" | "nocred"
-dotnet run --project src/ClaudeWatch
-Remove-Item Env:\CLAUDEWATCH_SHOWROOM
-```
+- **Duplo clique** no ícone: mostra/oculta o widget
+- **Botão direito** no ícone abre o menu:
+  - *Mostrar/ocultar widget* · *Travar widget* · *Estilo: Anéis / LED*
+  - *Atualizar agora* · *Iniciar com o Windows* · *Sair*
+- **Arraste** o cartão quando destravado — a posição é lembrada
 
-### Publicar (`.exe` único)
+## 🚦 Estados
 
-```powershell
-./publish.ps1                         # -> publish/ClaudeWatch.exe (~180 MB)
-```
+- **Cinza + "⚠ atualizado às HH:mm"** — sem internet ou API fora; mostra o último dado conhecido.
+- **🔒 "Faça login no Claude Code"** — sem credencial válida; faça login (`claude`) e o widget volta sozinho.
 
-Self-contained, `PublishSingleFile`, `ReadyToRun`, **`PublishTrimmed=false`**
-(WPF quebra trimado — inegociável). Exe não assinado: aviso SmartScreen esperado.
+## 🔒 Privacidade e segurança
 
-## Notas de implementação (desvios do ambiente)
+- **Lê** o `.credentials.json` do Claude Code, mas **nunca escreve** nele — invariante absoluta.
+- Usa a **mesma API** que o comando `/usage` do Claude Code.
+- O cache do token fica protegido por **DPAPI** (criptografia do Windows, por usuário).
+- **Sem telemetria**: nada vai para terceiros — apenas a chamada à API da Anthropic.
 
-- O .NET 10 gera **`ClaudeWatch.slnx`** (formato XML de solução), não `.sln`.
-- O SDK WindowsDesktop usa usings implícitos reduzidos; `System.IO` e `System.Net.Http`
-  foram reincluídos no csproj, e `System.Windows.Forms`/`System.Drawing` foram removidos
-  dos implícitos (colidiam com `System.Windows`).
-- `ProtectedData` (DPAPI) já vem no framework `net10.0-windows` — sem `PackageReference`.
+## ⚠️ Limitações e avisos
+
+O ClaudeWatch é um projeto **não-oficial** e **não é afiliado à Anthropic**. Ele se apoia na credencial e na API do Claude Code, então:
+
+- Pode **parar de funcionar** se a Anthropic mudar a API (sem aviso).
+- Faça uso **pessoal e moderado** — consultas muito frequentes podem ser limitadas (HTTP 429).
+- Use **por sua conta e risco**.
+
+## 🔄 Atualizações
+
+A cada algumas horas o app verifica se há versão nova e avisa pelo ícone do tray, por um balão do Windows e por um rodapé no próprio widget — é só clicar para abrir a página de download.
+
+## 🗂️ Arquivos e desinstalação
+
+- Configurações: `%AppData%\ClaudeWatch\settings.json` · Logs: `%AppData%\ClaudeWatch\logs\`
+- Para remover: feche pelo menu (*Sair*), desmarque *Iniciar com o Windows*, e apague o `.exe` junto da pasta `%AppData%\ClaudeWatch`.
+
+## 🛠️ Para desenvolvedores
+
+Feito com **.NET 10 + WPF**. Veja **[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)** para compilar, testar, publicar e lançar releases.
+
+---
+
+<p align="center"><sub>Projeto pessoal, sem fins lucrativos. Claude e Anthropic são marcas da Anthropic — este projeto não é afiliado nem endossado por ela.</sub></p>
