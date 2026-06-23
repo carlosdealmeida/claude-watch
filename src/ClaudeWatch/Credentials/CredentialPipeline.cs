@@ -1,37 +1,37 @@
+using ClaudeWatch.Core;
+
 namespace ClaudeWatch.Credentials;
 
-public sealed class CredentialPipeline(
-    ICredentialFile file, TokenCache cache, OAuthRefreshClient refresh, Action<string> log)
+/// <summary>
+/// Pipeline SOMENTE-LEITURA da credencial do Claude Code.
+///
+/// O ClaudeWatch e o Claude Code compartilham o MESMO refresh token do arquivo
+/// <c>.credentials.json</c>. O endpoint OAuth da Anthropic ROTACIONA o refresh token
+/// a cada renovação (invalida o antigo). Se o ClaudeWatch renovasse, ele consumiria/
+/// rotacionaria esse token e o Claude Code seria deslogado no dia seguinte.
+///
+/// Por isso este pipeline NUNCA renova: usa apenas o access token que já está no
+/// arquivo (o próprio Claude Code o mantém fresco quando em uso). Se o access token
+/// venceu e o CLI está ocioso, reportamos <see cref="SnapshotState.Stale"/> e esperamos
+/// o CLI renovar sozinho — jamais tocamos no refresh token.
+/// </summary>
+public sealed class CredentialPipeline(ICredentialFile file)
 {
-    private static readonly TimeSpan Margin = TimeSpan.FromMinutes(2);
-    private readonly SemaphoreSlim _gate = new(1, 1);
-    public bool NoCredential { get; private set; }
+    // Pequena margem para evitar disparar uma chamada com um token que vence em segundos.
+    private static readonly TimeSpan Margin = TimeSpan.FromMinutes(1);
 
-    public async Task<string?> GetAccessTokenAsync(DateTimeOffset now, CancellationToken ct)
+    public Task<TokenResult> GetAccessTokenAsync(DateTimeOffset now, CancellationToken ct) =>
+        Task.FromResult(Resolve(now));
+
+    public TokenResult Resolve(DateTimeOffset now)
     {
-        if (Pick(now) is { } fast) { NoCredential = false; return fast.AccessToken; }
-
-        await _gate.WaitAsync(ct);
-        try
-        {
-            // re-read: alguém pode ter renovado enquanto esperávamos o gate
-            if (Pick(now) is { } again) { NoCredential = false; return again.AccessToken; }
-
-            var fileCred = ParseFile();
-            if (fileCred?.RefreshToken is not { } rt) { NoCredential = true; return null; }
-
-            var result = await refresh.RefreshAsync(rt, ct);
-            if (result.Rejected) { cache.Clear(); NoCredential = true; return null; }
-            if (result.RotationDetected)
-                log("AVISO: refresh_token rotacionou; modo degradado — NUNCA escrever no arquivo do Claude Code.");
-            if (result.Credential is { } c) { cache.Save(c); NoCredential = false; return c.AccessToken; }
-            return null;
-        }
-        finally { _gate.Release(); }
+        var cred = ParseFile();
+        if (cred?.AccessToken is not { Length: > 0 } token)
+            return new(null, SnapshotState.NoCredential);
+        if (cred.ExpiresAt <= now + Margin)
+            return new(null, SnapshotState.Stale);
+        return new(token, SnapshotState.Ok);
     }
-
-    private OAuthCredential? Pick(DateTimeOffset now) =>
-        TokenSelector.PickValid(ParseFile(), cache.Load(), now, Margin);
 
     private OAuthCredential? ParseFile() =>
         file.ReadOrNull() is { } j ? ClaudeCodeCredentialsParser.TryParse(j) : null;

@@ -1,3 +1,4 @@
+using ClaudeWatch.Core;
 using ClaudeWatch.Credentials;
 using ClaudeWatch.Infrastructure;
 using Xunit;
@@ -12,53 +13,45 @@ public sealed class FakeCredFile(string? json) : ICredentialFile
 public class CredentialPipelineTests
 {
     private static readonly DateTimeOffset Now = DateTimeOffset.UnixEpoch.AddDays(1000);
-    private static string CredJson(long expMs, string rt = "RT") =>
-        $"{{\"claudeAiOauth\":{{\"accessToken\":\"FILE\",\"refreshToken\":\"{rt}\",\"expiresAt\":{expMs}}}}}";
-    private static string TempDir() => Directory.CreateDirectory(
-        Path.Combine(Path.GetTempPath(), "cw-" + Guid.NewGuid())).FullName;
-
-    private static CredentialPipeline Pipe(ICredentialFile f, TokenCache cache,
-        System.Net.HttpStatusCode code, string body) =>
-        new(f, cache, new OAuthRefreshClient(new HttpClient(new FakeHttpHandler(code, body))), _ => { });
+    private static string CredJson(long expMs, string access = "FILE") =>
+        $"{{\"claudeAiOauth\":{{\"accessToken\":\"{access}\",\"refreshToken\":\"RT\",\"expiresAt\":{expMs}}}}}";
 
     [Fact]
-    public async Task Arquivo_valido_nao_refresca()
+    public async Task Access_token_valido_e_usado()
     {
-        var p = Pipe(new FakeCredFile(CredJson(Now.AddHours(1).ToUnixTimeMilliseconds())),
-            new TokenCache(TempDir()), System.Net.HttpStatusCode.InternalServerError, "");
-        Assert.Equal("FILE", await p.GetAccessTokenAsync(Now, default));
-        Assert.False(p.NoCredential);
+        var p = new CredentialPipeline(new FakeCredFile(CredJson(Now.AddHours(1).ToUnixTimeMilliseconds())));
+        var r = await p.GetAccessTokenAsync(Now, default);
+        Assert.Equal("FILE", r.AccessToken);
+        Assert.Equal(SnapshotState.Ok, r.State);
     }
 
     [Fact]
-    public async Task Expirado_refresca_e_cacheia()
+    public async Task Access_token_expirado_fica_Stale_e_NUNCA_renova()
     {
-        var cache = new TokenCache(TempDir());
-        var p = Pipe(new FakeCredFile(CredJson(Now.AddMinutes(-1).ToUnixTimeMilliseconds())), cache,
-            System.Net.HttpStatusCode.OK, """{"access_token":"NEW","expires_in":3600}""");
-        Assert.Equal("NEW", await p.GetAccessTokenAsync(Now, default));
-        Assert.Equal("NEW", cache.Load()!.AccessToken);
-    }
-
-    [Fact]
-    public async Task Refresh_rejeitado_limpa_cache_e_marca_NoCredential()
-    {
-        var cache = new TokenCache(TempDir());
-        cache.Save(new OAuthCredential("OLD", null, Now.AddMinutes(-5)));
-        var p = Pipe(new FakeCredFile(CredJson(Now.AddMinutes(-1).ToUnixTimeMilliseconds())), cache,
-            System.Net.HttpStatusCode.BadRequest, "{}");
-        Assert.Null(await p.GetAccessTokenAsync(Now, default));
-        Assert.True(p.NoCredential);
-        Assert.Null(cache.Load());
+        // Token expirado: o app é somente-leitura, então NÃO pode renovar —
+        // renovar rotacionaria o refresh token compartilhado e deslogaria o Claude Code.
+        var p = new CredentialPipeline(new FakeCredFile(CredJson(Now.AddMinutes(-1).ToUnixTimeMilliseconds())));
+        var r = await p.GetAccessTokenAsync(Now, default);
+        Assert.Null(r.AccessToken);
+        Assert.Equal(SnapshotState.Stale, r.State);
     }
 
     [Fact]
     public async Task Sem_arquivo_e_NoCredential()
     {
-        var p = Pipe(new FakeCredFile(null), new TokenCache(TempDir()),
-            System.Net.HttpStatusCode.OK, "{}");
-        Assert.Null(await p.GetAccessTokenAsync(Now, default));
-        Assert.True(p.NoCredential);
+        var p = new CredentialPipeline(new FakeCredFile(null));
+        var r = await p.GetAccessTokenAsync(Now, default);
+        Assert.Null(r.AccessToken);
+        Assert.Equal(SnapshotState.NoCredential, r.State);
+    }
+
+    [Fact]
+    public async Task Arquivo_sem_accessToken_e_NoCredential()
+    {
+        var p = new CredentialPipeline(new FakeCredFile("{\"claudeAiOauth\":{\"refreshToken\":\"RT\",\"expiresAt\":0}}"));
+        var r = await p.GetAccessTokenAsync(Now, default);
+        Assert.Null(r.AccessToken);
+        Assert.Equal(SnapshotState.NoCredential, r.State);
     }
 }
 
