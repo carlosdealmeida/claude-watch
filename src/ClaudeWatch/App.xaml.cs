@@ -38,8 +38,7 @@ public partial class App : Application
         var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         _credFile = new FileCredentialFile(CredentialPaths.Resolve(home, settings));
         var http = new HttpClient();
-        var pipeline = new CredentialPipeline(_credFile, new TokenCache(AppPaths.BaseDir),
-            new OAuthRefreshClient(http), log.Log);
+        var pipeline = new CredentialPipeline(_credFile);
         var usage = new UsageClient(http);
 
         var vm = new WidgetViewModel { Skin = settings.Skin };
@@ -48,7 +47,7 @@ public partial class App : Application
 
         var demo = Showroom.Mode is not null;
         var poller = new UsagePoller(
-            getToken: demo ? _ => Task.FromResult<string?>("demo")
+            getToken: demo ? _ => Task.FromResult(new TokenResult("demo", SnapshotState.Ok))
                            : ct => pipeline.GetAccessTokenAsync(DateTimeOffset.UtcNow, ct),
             fetch: demo ? (_, _) => Task.FromResult(Showroom.Snapshot())
                         : usage.FetchAsync,

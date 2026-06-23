@@ -1,7 +1,13 @@
 namespace ClaudeWatch.Core;
 
+/// <summary>
+/// Resultado da resolução de token. Quando <see cref="AccessToken"/> é nulo,
+/// <see cref="State"/> diz por quê (sem credencial vs. credencial presente porém vencida).
+/// </summary>
+public readonly record struct TokenResult(string? AccessToken, SnapshotState State);
+
 public sealed class UsagePoller(
-    Func<CancellationToken, Task<string?>> getToken,
+    Func<CancellationToken, Task<TokenResult>> getToken,
     Func<string, CancellationToken, Task<UsageSnapshot>> fetch,
     Action<UsageSnapshot> publish,
     Action<string> log)
@@ -24,8 +30,8 @@ public sealed class UsagePoller(
         try
         {
             var token = await getToken(ct);
-            if (token is null) { publish(WithState(SnapshotState.NoCredential)); return; }
-            _last = await fetch(token, ct);
+            if (token.AccessToken is null) { publish(WithState(token.State)); return; }
+            _last = await fetch(token.AccessToken, ct);
             Backoff.Success();
             publish(_last);
         }
