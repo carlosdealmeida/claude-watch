@@ -7,7 +7,8 @@ public sealed class TrayController : IDisposable
 {
     private readonly NotifyIcon _icon;
     private System.Drawing.Icon? _current;
-    private readonly ToolStripMenuItem _lock, _autostart, _skinAneis, _skinLed;
+    private readonly ToolStripMenuItem _lock, _autostart;
+    private readonly (string Key, ToolStripMenuItem Item)[] _skins;
     private readonly ContextMenuStrip _menu;
     private ToolStripMenuItem? _updateItem;
     private string? _updateUrl;
@@ -25,12 +26,20 @@ public sealed class TrayController : IDisposable
         _autostart = new ToolStripMenuItem("Iniciar com o Windows") { CheckOnClick = true, Checked = autostart };
         _autostart.CheckedChanged += (_, _) => AutostartChanged?.Invoke(_autostart.Checked);
 
-        _skinAneis = new ToolStripMenuItem("Anéis") { Checked = skin == "Aneis" };
-        _skinLed = new ToolStripMenuItem("LED") { Checked = skin == "Led" };
-        _skinAneis.Click += (_, _) => SelectSkin("Aneis");
-        _skinLed.Click += (_, _) => SelectSkin("Led");
+        _skins =
+        [
+            ("Aneis", new ToolStripMenuItem("Anéis")),
+            ("Barras", new ToolStripMenuItem("Barras")),
+            ("Compacto", new ToolStripMenuItem("Compacto")),
+            ("Led", new ToolStripMenuItem("LED")),
+        ];
         var estilo = new ToolStripMenuItem("Estilo");
-        estilo.DropDownItems.AddRange([_skinAneis, _skinLed]);
+        foreach (var (key, item) in _skins)
+        {
+            item.Checked = key == skin;
+            item.Click += (_, _) => SelectSkin(key);
+            estilo.DropDownItems.Add(item);
+        }
 
         _menu = new ContextMenuStrip();
         _menu.Items.Add("Mostrar/ocultar widget", null, (_, _) => ToggleWidget?.Invoke());
@@ -48,14 +57,13 @@ public sealed class TrayController : IDisposable
 
     private void SelectSkin(string skin)
     {
-        _skinAneis.Checked = skin == "Aneis";
-        _skinLed.Checked = skin == "Led";
+        foreach (var (key, item) in _skins) item.Checked = key == skin;
         SkinChanged?.Invoke(skin);
     }
 
     public void Update(UsageSnapshot s)
     {
-        var next = IconRenderer.Render(s.Worst);
+        var next = IconRenderer.Render(s.Critical);
         _icon.Icon = next;
         _icon.Text = TooltipFormatter.Format(s);
         _current?.Dispose();

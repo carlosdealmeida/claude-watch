@@ -27,7 +27,8 @@ public static class Showroom
         var now = DateTimeOffset.Now;
         return Build(now, state,
             new Meter("Sessão 5h", 42, now.AddHours(2)) { Key = "five_hour", Short = "5h", WindowStart = now.AddHours(-3) },
-            new Meter("Semana", 78, now.AddDays(3)) { Key = "weekly_all", Short = "Sem", WindowStart = now.AddDays(-4) },
+            new Meter("Semana", 78, now.AddDays(3))
+            { Key = "weekly_all", Short = "Sem", WindowStart = now.AddDays(-4), Part = 39, PartCap = 50, PartLabel = "Fable" },
             new Meter("Fable", 96, now.AddDays(3)) { Key = "weekly_scoped:fable", Short = "Fable", WindowStart = now.AddDays(-4) });
     }
 
@@ -36,10 +37,14 @@ public static class Showroom
         var now = DateTimeOffset.Now;
         var start = now.AddDays(-1);
         return Build(now, SnapshotState.Ok,
-            new Meter("Semana", 12, start.AddDays(7)) { Key = "weekly_all", Short = "Sem", WindowStart = start },
+            new Meter("Semana", 12, start.AddDays(7))
+            { Key = "weekly_all", Short = "Sem", WindowStart = start, Part = 9, PartCap = 50, PartLabel = "Fable" },
             new Meter("Fable", 18, start.AddDays(7)) { Key = "weekly_scoped:fable", Short = "Fable", WindowStart = start });
     }
 
     private static UsageSnapshot Build(DateTimeOffset now, SnapshotState state, params Meter[] meters) =>
-        new(meters.Select(m => MeterHints.Annotate(m, now, TimeZoneInfo.Local)).ToList(), now, state);
+        new(meters.Select(m => MeterHints.Annotate(m, now, TimeZoneInfo.Local)).ToList(), now, state)
+        {
+            Breakdown = [new BreakdownRow("Claude Code", 92), new BreakdownRow("Cowork", 8)],
+        };
 }

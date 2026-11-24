@@ -71,6 +71,41 @@ public class UsageTests
     }
 
     [Fact]
+    public void Fatia_do_fable_entra_no_medidor_da_semana()
+    {
+        var s = UsageResponseParser.Parse(Ultra, UltraNow, Brt);
+        var semana = s.Find("weekly_all")!;
+        Assert.Equal((9, 50, "Fable"), (semana.Part, semana.PartCap, semana.PartLabel));
+        Assert.Equal("Fable 9 de 12%", semana.PartText);
+        Assert.Null(s.Find("weekly_scoped:fable")!.Part);
+    }
+
+    [Fact]
+    public void Breakdown_ignora_linhas_zeradas()
+    {
+        const string json = """
+        {"limits":[{"kind":"weekly_all","group":"weekly","percent":12,"resets_at":"2026-11-30T12:00:00Z"}],
+         "seven_day_breakdown":{"rows":[
+           {"key":"claude_code","display_name":"Claude Code","percent":92},
+           {"key":"chat","display_name":"Chats","percent":0},
+           {"key":"cowork","display_name":"Cowork","percent":8}]}}
+        """;
+        var s = UsageResponseParser.Parse(json, UltraNow, Brt);
+        Assert.Equal(new[] { "Claude Code", "Cowork" }, s.Breakdown.Select(b => b.Label));
+        Assert.Equal("Semana: Claude Code 92% · Cowork 8%", s.BreakdownText);
+    }
+
+    [Fact]
+    public void Critico_e_o_que_acaba_antes_do_reset_mesmo_com_percentual_menor()
+    {
+        var s = UsageResponseParser.Parse(Ultra, UltraNow, Brt);
+        Assert.Equal("Fable", s.Critical.Label);
+        Assert.Equal(Zone.Verde, s.Critical.Zone);
+        Assert.Equal(Zone.Ambar, s.Critical.DisplayZone); // 18% verde, mas acaba antes do reset
+        Assert.Equal(Zone.Verde, s.Find("weekly_all")!.DisplayZone);
+    }
+
+    [Fact]
     public void Sessao_de_5h_vem_primeiro_quando_existe()
     {
         const string json = """

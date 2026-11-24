@@ -37,7 +37,7 @@
 
 ## ✨ Funciones
 
-- 🎨 Dos estilos: **Anillos** y **LED** — cambia con un clic
+- 🎨 Cuatro estilos, elegidos en el menú de la bandeja: **Anillos** (concéntricos, el límite crítico en el centro), **Barras** (con la parte de Fable dentro de la semanal), **Compacto** (una píldora; el detalle se abre al pasar el ratón) y **LED**
 - 🧭 **Ritmo**: si al ritmo actual un límite se agota antes del reinicio, la tarjeta avisa en ámbar — `⚠ acaba dom 01:16`; si no, muestra cuándo se reinicia — `↻ seg 09:00`
 - 🔢 Icono en la bandeja con el medidor más crítico, según el color de la zona
 - 🚦 Color por nivel: 🟢 verde (&lt;70%) · 🟠 ámbar (70–89%) · 🔴 rojo (≥90%)

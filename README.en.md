@@ -37,7 +37,7 @@
 
 ## ✨ Features
 
-- 🎨 Two styles: **Rings** and **LED** — switch with one click
+- 🎨 Four styles, picked from the tray menu: **Rings** (concentric, the critical limit in the center), **Bars** (with the Fable share inside the weekly bar), **Compact** (a pill; details open on hover) and **LED**
 - 🧭 **Pace**: if a limit would run out before it resets at the current rate, the card warns in amber — `⚠ acaba dom 01:16`; otherwise it shows when it resets — `↻ seg 09:00`
 - 🔢 Tray icon showing the most critical meter, colored by zone
 - 🚦 Color by level: 🟢 green (&lt;70%) · 🟠 amber (70–89%) · 🔴 red (≥90%)

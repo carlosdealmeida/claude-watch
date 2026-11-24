@@ -37,7 +37,7 @@ O **ClaudeWatch** mostra, em tempo real e de relance, quanto você já usou dos 
 
 ## ✨ Recursos
 
-- 🎨 Dois estilos: **Anéis** e **LED** — troque com um clique
+- 🎨 Quatro estilos, escolhidos no menu do tray: **Anéis** (concêntricos, o limite em destaque no centro), **Barras** (com a fatia do Fable dentro da semana), **Compacto** (uma pílula; o detalhe abre ao passar o mouse) e **LED**
 - 🧭 **Ritmo**: se no ritmo atual um limite acaba antes do reset, o cartão avisa em âmbar — `⚠ acaba dom 01:16`; senão, mostra quando reseta — `↻ seg 09:00`
 - 🔢 Ícone no tray com o medidor mais crítico, na cor da zona
 - 🚦 Cores por nível: 🟢 verde (&lt;70%) · 🟠 âmbar (70–89%) · 🔴 vermelho (≥90%)

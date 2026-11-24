@@ -11,6 +11,10 @@ public static class IconRenderer
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool DestroyIcon(IntPtr handle);
 
+    /// <summary>
+    /// O número do medidor em destaque, na cor dele — âmbar quando o ritmo esgota
+    /// antes do reset, mesmo com o percentual ainda baixo.
+    /// </summary>
     public static Icon Render(Meter worst)
     {
         using var bmp = new Bitmap(32, 32);
@@ -18,7 +22,7 @@ public static class IconRenderer
         g.SmoothingMode = SmoothingMode.AntiAlias;
         g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit; // ClearType não renderiza sobre alpha
 
-        var color = ColorTranslator.FromHtml(ZoneColors.Hex(worst.Zone));
+        var color = ColorTranslator.FromHtml(ZoneColors.Hex(worst.DisplayZone));
         var text = worst.Pct.ToString();
         using var font = new Font("Segoe UI", worst.Pct >= 100 ? 14f : 19f, FontStyle.Bold, GraphicsUnit.Pixel);
         using var brush = new SolidBrush(color);

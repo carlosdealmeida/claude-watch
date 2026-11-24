@@ -2,16 +2,27 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:w="clr-namespace:ClaudeWatch.Widget">
   <w:PctToBrushConverter x:Key="PctBrush"/>
-  <w:PctToRingGeometryConverter x:Key="PctRing"/>
+  <w:ZoneToBrushConverter x:Key="ZoneBrush"/>
+  <w:PctToStarConverter x:Key="Star"/>
   <w:LedSegmentsConverter x:Key="LedSegs"/>
   <w:LocalHhmmConverter x:Key="LocalHhmm"/>
   <w:NullToCollapsedConverter x:Key="NullToCollapsed"/>
   <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
+  <!-- Hachura da fatia do Fable dentro da barra da Semana -->
+  <LinearGradientBrush x:Key="Hatch" MappingMode="Absolute" SpreadMethod="Repeat"
+                       StartPoint="0,0" EndPoint="5,5">
+    <GradientStop Color="#E8A23D" Offset="0"/>
+    <GradientStop Color="#E8A23D" Offset="0.5"/>
+    <GradientStop Color="#A8701F" Offset="0.5"/>
+    <GradientStop Color="#A8701F" Offset="1"/>
+  </LinearGradientBrush>
+
   <!-- Linha de dica sob o medidor: reset, ou âmbar quando acaba antes do reset -->
   <Style x:Key="HintText" TargetType="TextBlock">
-    <Setter Property="FontSize" Value="9.5"/>
-    <Setter Property="Foreground" Value="#8CFFFFFF"/>
+    <Setter Property="FontSize" Value="10.5"/>
+    <Setter Property="Foreground" Value="#A9B0B8"/>
+    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
     <Setter Property="Text" Value="{Binding Hint}"/>
     <Setter Property="Visibility" Value="{Binding Hint, Converter={StaticResource NullToCollapsed}}"/>
     <Style.Triggers>
@@ -21,42 +32,166 @@
     </Style.Triggers>
   </Style>
 
-  <!-- Skin A — um anel -->
-  <DataTemplate x:Key="MeterRing">
-    <StackPanel MinWidth="76" Margin="4,0" HorizontalAlignment="Center">
-      <Grid Width="56" Height="56" HorizontalAlignment="Center">
-        <Ellipse Stroke="#24FFFFFF" StrokeThickness="6" Margin="3"/>
-        <Path Stroke="{Binding Pct, Converter={StaticResource PctBrush}}"
-              StrokeThickness="6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-              Data="{Binding Pct, Converter={StaticResource PctRing}}"/>
-        <TextBlock Text="{Binding Pct, StringFormat={}{0}%}" Foreground="White"
-                   FontFamily="Segoe UI" FontSize="14" FontWeight="SemiBold"
-                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+  <!-- Linha de legenda: ● Fable   ⚠ acaba dom 01:16   18% -->
+  <DataTemplate x:Key="LegendRow">
+    <Grid Margin="0,3">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="14"/>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="40"/>
+      </Grid.ColumnDefinitions>
+      <Ellipse Width="8" Height="8" HorizontalAlignment="Left" VerticalAlignment="Center"
+               Fill="{Binding DisplayZone, Converter={StaticResource ZoneBrush}}"/>
+      <TextBlock Grid.Column="1" Text="{Binding Label}" Foreground="#E6EAEE" FontSize="12"
+                 VerticalAlignment="Center"/>
+      <TextBlock Grid.Column="2" Style="{StaticResource HintText}" HorizontalAlignment="Right"
+                 VerticalAlignment="Center" Margin="10,0,0,0"/>
+      <TextBlock Grid.Column="3" Text="{Binding Pct, StringFormat={}{0}%}" Foreground="White"
+                 FontSize="12" FontWeight="SemiBold" TextAlignment="Right" VerticalAlignment="Center"/>
+    </Grid>
+  </DataTemplate>
+
+  <!-- Skin Anéis — anéis concêntricos (o primeiro limite por fora), destaque no centro -->
+  <DataTemplate x:Key="SkinAneis">
+    <StackPanel Width="236">
+      <Grid Width="152" Height="152" HorizontalAlignment="Center">
+        <ItemsControl ItemsSource="{Binding Rings}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><Grid/></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <Grid>
+                <Path Data="{Binding Track}" Stroke="#1FFFFFFF" StrokeThickness="{Binding Thickness}"/>
+                <Path Data="{Binding Arc}" Stroke="{Binding Brush}" StrokeThickness="{Binding Thickness}"
+                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+              </Grid>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+          <TextBlock Text="{Binding Critical.Pct, StringFormat={}{0}%}" Foreground="White"
+                     FontSize="24" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+          <TextBlock Text="{Binding Critical.Label}" Foreground="#A9B0B8" FontSize="10.5"
+                     HorizontalAlignment="Center"/>
+        </StackPanel>
       </Grid>
-      <TextBlock Text="{Binding Label}" Foreground="#BDFFFFFF" FontSize="10.5"
-                 HorizontalAlignment="Center" Margin="0,7,0,0"/>
-      <TextBlock Style="{StaticResource HintText}" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+      <ItemsControl ItemsSource="{Binding Snapshot.Meters}" ItemTemplate="{StaticResource LegendRow}"
+                    Margin="0,12,0,0"/>
     </StackPanel>
   </DataTemplate>
 
-  <DataTemplate x:Key="SkinAneis">
-    <!-- Quantos anéis houver no plano: 2 no Ultra (Semana, Fable), 3 no Max (+ Sessão 5h) -->
-    <ItemsControl ItemsSource="{Binding Snapshot.Meters}" ItemTemplate="{StaticResource MeterRing}"
-                  HorizontalAlignment="Center" MinWidth="236">
-      <ItemsControl.ItemsPanel>
-        <ItemsPanelTemplate><StackPanel Orientation="Horizontal" HorizontalAlignment="Center"/></ItemsPanelTemplate>
-      </ItemsControl.ItemsPanel>
-    </ItemsControl>
+  <!-- Skin Barras — uma barra por limite, com a fatia do Fable dentro da Semana -->
+  <DataTemplate x:Key="BarRow">
+    <StackPanel Margin="0,0,0,12">
+      <Grid>
+        <TextBlock Text="{Binding Label}" Foreground="#E6EAEE" FontSize="12" VerticalAlignment="Bottom"/>
+        <TextBlock Text="{Binding Pct, StringFormat={}{0}%}" HorizontalAlignment="Right" FontSize="14"
+                   FontWeight="SemiBold" Foreground="{Binding DisplayZone, Converter={StaticResource ZoneBrush}}"/>
+      </Grid>
+      <Grid Height="8" Margin="0,5,0,5">
+        <Border Background="#1FFFFFFF" CornerRadius="4"/>
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="{Binding Pct, Converter={StaticResource Star}}"/>
+            <ColumnDefinition Width="{Binding Pct, Converter={StaticResource Star}, ConverterParameter=rest}"/>
+          </Grid.ColumnDefinitions>
+          <Border Background="{Binding DisplayZone, Converter={StaticResource ZoneBrush}}" CornerRadius="4"/>
+        </Grid>
+        <Grid Visibility="{Binding Part, Converter={StaticResource NullToCollapsed}}">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="{Binding Part, Converter={StaticResource Star}}"/>
+            <ColumnDefinition Width="{Binding Part, Converter={StaticResource Star}, ConverterParameter=rest}"/>
+          </Grid.ColumnDefinitions>
+          <Border Background="{StaticResource Hatch}" CornerRadius="4"/>
+        </Grid>
+        <!-- teto da fatia (o Fable pode usar até 50% da semana) -->
+        <Grid Visibility="{Binding PartCap, Converter={StaticResource NullToCollapsed}}" Margin="0,-2">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="{Binding PartCap, Converter={StaticResource Star}}"/>
+            <ColumnDefinition Width="{Binding PartCap, Converter={StaticResource Star}, ConverterParameter=rest}"/>
+          </Grid.ColumnDefinitions>
+          <Border Grid.Column="1" Width="1" HorizontalAlignment="Left" Background="#59FFFFFF"/>
+        </Grid>
+      </Grid>
+      <Grid>
+        <TextBlock Style="{StaticResource HintText}" HorizontalAlignment="Left"/>
+        <TextBlock Text="{Binding PartText}" HorizontalAlignment="Right" FontSize="10.5" Foreground="#A9B0B8"
+                   Visibility="{Binding PartText, Converter={StaticResource NullToCollapsed}}"/>
+      </Grid>
+    </StackPanel>
   </DataTemplate>
 
-  <!-- Skin E — LED/equalizador -->
+  <DataTemplate x:Key="SkinBarras">
+    <ItemsControl ItemsSource="{Binding Snapshot.Meters}" ItemTemplate="{StaticResource BarRow}"
+                  Width="236" Margin="0,0,0,-12"/>
+  </DataTemplate>
+
+  <!-- Skin Compacto — pílula com o limite em destaque; o detalhe abre ao passar o mouse -->
+  <DataTemplate x:Key="OtherPill">
+    <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+      <TextBlock Text="{Binding Short}" Foreground="#A9B0B8" FontSize="12.5" VerticalAlignment="Center"/>
+      <TextBlock Text="{Binding Pct, StringFormat={}{0}%}" Foreground="White" FontSize="12.5"
+                 FontWeight="SemiBold" Margin="4,0,0,0" VerticalAlignment="Center"/>
+    </StackPanel>
+  </DataTemplate>
+
+  <DataTemplate x:Key="SkinCompacto">
+    <StackPanel>
+      <StackPanel Orientation="Horizontal">
+        <Ellipse Width="10" Height="10" VerticalAlignment="Center"
+                 Fill="{Binding Critical.DisplayZone, Converter={StaticResource ZoneBrush}}"/>
+        <TextBlock Text="{Binding Critical.Label}" Foreground="#E6EAEE" FontSize="12.5"
+                   Margin="8,0,0,0" VerticalAlignment="Center"/>
+        <TextBlock Text="{Binding Critical.Pct, StringFormat={}{0}%}" Foreground="White" FontSize="12.5"
+                   FontWeight="SemiBold" Margin="4,0,0,0" VerticalAlignment="Center"/>
+        <ContentControl Content="{Binding Critical}" Margin="10,0,0,0" VerticalAlignment="Center">
+          <ContentControl.ContentTemplate>
+            <DataTemplate><TextBlock Style="{StaticResource HintText}"/></DataTemplate>
+          </ContentControl.ContentTemplate>
+        </ContentControl>
+        <Border Width="1" Height="14" Background="#24FFFFFF" Margin="10,0,0,0"
+                Visibility="{Binding HasOthers, Converter={StaticResource BoolToVis}}"/>
+        <ItemsControl ItemsSource="{Binding Others}" ItemTemplate="{StaticResource OtherPill}"
+                      VerticalAlignment="Center">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><StackPanel Orientation="Horizontal"/></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+        </ItemsControl>
+      </StackPanel>
+
+      <!-- Detalhe ao passar o mouse (no modo travado o mouse atravessa, então não abre) -->
+      <StackPanel Margin="0,10,0,2" MinWidth="236">
+        <StackPanel.Style>
+          <Style TargetType="StackPanel">
+            <Setter Property="Visibility" Value="Collapsed"/>
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+                <Setter Property="Visibility" Value="Visible"/>
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </StackPanel.Style>
+        <ItemsControl ItemsSource="{Binding Snapshot.Meters}" ItemTemplate="{StaticResource LegendRow}"/>
+        <Border Height="1" Background="#14FFFFFF" Margin="0,8"/>
+        <TextBlock Text="{Binding Snapshot.BreakdownText}" Foreground="#A9B0B8" FontSize="10.5"
+                   TextWrapping="Wrap" Margin="0,0,0,4"
+                   Visibility="{Binding Snapshot.BreakdownText, Converter={StaticResource NullToCollapsed}}"/>
+        <TextBlock Text="{Binding Snapshot.CollectedAt, Converter={StaticResource LocalHhmm}, StringFormat='atualizado às {0}'}"
+                   Foreground="#8E959D" FontSize="10.5"/>
+      </StackPanel>
+    </StackPanel>
+  </DataTemplate>
+
+  <!-- Skin LED/equalizador -->
   <DataTemplate x:Key="LedRow">
     <Grid Margin="0,6" Width="240">
       <Grid.RowDefinitions><RowDefinition/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="48"/><ColumnDefinition Width="*"/><ColumnDefinition Width="30"/>
       </Grid.ColumnDefinitions>
-      <TextBlock Text="{Binding Label}" Foreground="#C7FFFFFF" FontSize="10.5" VerticalAlignment="Center"/>
+      <TextBlock Text="{Binding Short}" Foreground="#C7FFFFFF" FontSize="10.5" VerticalAlignment="Center"/>
       <ItemsControl Grid.Column="1" ItemsSource="{Binding Pct, Converter={StaticResource LedSegs}}"
                     VerticalAlignment="Center">
         <ItemsControl.ItemsPanel>
@@ -93,7 +228,7 @@
       </ItemsControl>
       <TextBlock Grid.Column="2" Text="{Binding Pct, StringFormat={}{0}%}" FontSize="11"
                  FontWeight="SemiBold" TextAlignment="Right" VerticalAlignment="Center"
-                 Foreground="{Binding Pct, Converter={StaticResource PctBrush}}"/>
+                 Foreground="{Binding DisplayZone, Converter={StaticResource ZoneBrush}}"/>
       <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Style="{StaticResource HintText}"
                  HorizontalAlignment="Right" Margin="0,3,0,0"/>
     </Grid>

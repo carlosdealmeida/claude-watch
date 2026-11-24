@@ -9,6 +9,8 @@ O acompanhamento detalhado de cada item está nas [issues](https://github.com/ca
 ### v0.4.0 — Limites dinâmicos e ritmo
 O cartão mostra os limites que o plano tem de fato, lidos do array `limits` da resposta: no Ultra verificado, **Semana** e **Fable**, sem a sessão de 5h. Cada medidor projeta, pelo ritmo da janela atual, se acaba antes do reset (`⚠ acaba dom 01:16`) ou mostra quando reseta (`↻ seg 09:00`). Cobre a parte do reset semanal da [#2](https://github.com/carlosdealmeida/claude-watch/issues/2).
 
+Três estilos novos para escolher no tray ([#12](https://github.com/carlosdealmeida/claude-watch/issues/12)): **Anéis** concêntricos, **Barras** com a fatia do Fable dentro da semana ([#11](https://github.com/carlosdealmeida/claude-watch/issues/11)) e **Compacto**, cujo detalhe ao passar o mouse mostra de onde veio o consumo da semana ([#10](https://github.com/carlosdealmeida/claude-watch/issues/10)). O ícone do tray destaca o limite que acaba antes do reset, em âmbar mesmo com percentual baixo.
+
 ### v0.3.0 — Reset da sessão de 5h no cartão
 Linha `↻ reseta às HH:mm` no rodapé do cartão (ambos os skins), some quando não há reset. Ataca diretamente a confusão de _"quando volta a poder usar"_ (claude-code#6679).
 

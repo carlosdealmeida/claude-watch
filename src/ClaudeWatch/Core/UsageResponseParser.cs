@@ -29,16 +29,18 @@ public static class UsageResponseParser
             .Select(m => MeterHints.Annotate(m, now, tz ?? TimeZoneInfo.Local))
             .ToList();
 
-        return new UsageSnapshot(meters, now, SnapshotState.Ok);
+        return new UsageSnapshot(meters, now, SnapshotState.Ok) { Breakdown = Breakdown(n) };
     }
 
     private static List<Meter>? FromLimits(JsonNode n, DateTimeOffset? weekStart)
     {
         if (n["limits"] is not JsonArray { Count: > 0 } limits) return null;
 
-        var list = new List<(int Order, Meter Meter)>();
-        foreach (var l in limits.OfType<JsonObject>())
+        // Índice original preservado: weekly_scoped_shares aponta para ele (limit_index).
+        var list = new List<(int Order, int Index, Meter Meter)>();
+        for (var i = 0; i < limits.Count; i++)
         {
+            if (limits[i] is not JsonObject l) continue;
             var kind = Str(l["kind"]) ?? "";
             var group = Str(l["group"]) ?? "";
             var scopeName = Str(l["scope"]?["model"]?["display_name"])
@@ -61,11 +63,54 @@ public static class UsageResponseParser
                 : null;
 
             var key = scopeName is null ? kind : $"{kind}:{scopeName.ToLowerInvariant()}";
-            list.Add((order, new Meter(label, pct, reset) { Key = key, Short = shortLabel, WindowStart = start }));
+            list.Add((order, i, new Meter(label, pct, reset) { Key = key, Short = shortLabel, WindowStart = start }));
         }
 
+        ApplyShares(n, list);
         return list.OrderBy(x => x.Order).Select(x => x.Meter).ToList();
     }
+
+    /// <summary>
+    /// weekly_scoped_shares: quanto um limite por modelo (o Fable) já comeu da Semana
+    /// e o teto dele — <c>{ limit_index, used_percent_of_weekly, allowance_percent_of_weekly }</c>.
+    /// Vira a fatia desenhada dentro do medidor da Semana.
+    /// </summary>
+    private static void ApplyShares(JsonNode n, List<(int Order, int Index, Meter Meter)> list)
+    {
+        if (n["weekly_scoped_shares"] is not JsonArray shares) return;
+        var week = list.FindIndex(x => x.Meter.Key == "weekly_all");
+        if (week < 0) return;
+
+        foreach (var sh in shares.OfType<JsonObject>())
+        {
+            if (sh["limit_index"] is not JsonValue li || sh["used_percent_of_weekly"] is not JsonValue used) continue;
+            var scoped = list.FindIndex(x => x.Index == li.GetValue<int>());
+            if (scoped < 0) continue;
+            int? cap = sh["allowance_percent_of_weekly"] is JsonValue a ? (int)Math.Round(a.GetValue<double>()) : null;
+
+            var w = list[week];
+            list[week] = w with
+            {
+                Meter = w.Meter with
+                {
+                    Part = ZoneRules.Clamp((int)Math.Round(used.GetValue<double>())),
+                    PartCap = cap,
+                    PartLabel = list[scoped].Meter.Label,
+                },
+            };
+            return; // uma fatia só: com mais de um limite por modelo, o primeiro
+        }
+    }
+
+    private static IReadOnlyList<BreakdownRow> Breakdown(JsonNode n) =>
+        n["seven_day_breakdown"]?["rows"] is JsonArray rows
+            ? rows.OfType<JsonObject>()
+                .Select(r => new BreakdownRow(
+                    Str(r["display_name"]) ?? Str(r["key"]) ?? "?",
+                    r["percent"] is JsonValue p ? (int)Math.Round(p.GetValue<double>()) : 0))
+                .Where(r => r.Pct > 0)
+                .ToList()
+            : [];
 
     private static List<Meter> FromBuckets(JsonNode n)
     {

@@ -14,21 +14,23 @@ public sealed class PctToBrushConverter : IValueConverter
     public object ConvertBack(object v, Type t, object p, CultureInfo c) => throw new NotSupportedException();
 }
 
-public sealed class PctToRingGeometryConverter : IValueConverter
+public sealed class ZoneToBrushConverter : IValueConverter
 {
-    // anel 56px, stroke 6 → r=25, centro (28,28), início no topo, sentido horário
+    public object Convert(object v, Type t, object p, CultureInfo c) =>
+        ZoneBrushes.Of(v is Zone z ? z : Zone.Verde);
+    public object ConvertBack(object v, Type t, object p, CultureInfo c) => throw new NotSupportedException();
+}
+
+/// <summary>
+/// Percentual → largura proporcional de coluna do Grid: <c>42</c> vira <c>42*</c>,
+/// e com ConverterParameter=rest, <c>58*</c>. Nulo vira 0*.
+/// </summary>
+public sealed class PctToStarConverter : IValueConverter
+{
     public object Convert(object v, Type t, object p, CultureInfo c)
     {
-        var pct = Math.Clamp(System.Convert.ToDouble(v), 0, 100);
-        var ang = Math.Min(pct / 100.0 * 360.0, 359.9) * Math.PI / 180.0;
-        const double r = 25, cx = 28, cy = 28;
-        var fig = new PathFigure { StartPoint = new(cx, cy - r), IsClosed = false };
-        fig.Segments.Add(new ArcSegment(
-            new(cx + r * Math.Sin(ang), cy - r * Math.Cos(ang)),
-            new(r, r), 0, pct > 50, SweepDirection.Clockwise, true));
-        var geo = new PathGeometry { Figures = { fig } };
-        geo.Freeze();
-        return geo;
+        var pct = v is null ? 0 : Math.Clamp(System.Convert.ToDouble(v), 0, 100);
+        return new GridLength(p as string == "rest" ? 100 - pct : pct, GridUnitType.Star);
     }
     public object ConvertBack(object v, Type t, object p, CultureInfo c) => throw new NotSupportedException();
 }

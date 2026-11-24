@@ -6,7 +6,7 @@ public sealed record Settings
 {
     public double? PosX { get; init; }
     public double? PosY { get; init; }
-    public string Skin { get; init; } = "Aneis"; // "Aneis" | "Led"
+    public string Skin { get; init; } = "Aneis"; // "Aneis" | "Barras" | "Compacto" | "Led"
     public bool Locked { get; init; }
     public int IntervalSeconds { get; init; } = 60;
     public string? WslCredentialsPath { get; init; }
