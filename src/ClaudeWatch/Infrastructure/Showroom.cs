@@ -5,7 +5,7 @@ namespace ClaudeWatch.Infrastructure;
 /// <summary>
 /// Modo demo opt-in (env var CLAUDEWATCH_SHOWROOM=ok|stale|nocred): injeta o
 /// snapshot canônico 42/78/96 sem tocar a rede, para QA visual dos skins/estados
-/// enquanto os endpoints reais (TODO carlos) não estão preenchidos. Default: off.
+/// e para tirar screenshots sem expor o uso real. Default: off.
 /// </summary>
 public static class Showroom
 {

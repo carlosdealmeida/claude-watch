@@ -14,6 +14,8 @@
 <p align="center">
   <img alt="versão" src="https://img.shields.io/github/v/release/carlosdealmeida/claude-watch?label=vers%C3%A3o&color=3FB950">
   <img alt="downloads" src="https://img.shields.io/github/downloads/carlosdealmeida/claude-watch/total?label=downloads&color=4C9AFF">
+  <a href="https://github.com/carlosdealmeida/claude-watch/actions/workflows/ci.yml"><img alt="Testes" src="https://github.com/carlosdealmeida/claude-watch/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="LICENSE"><img alt="Licença: MIT" src="https://img.shields.io/badge/license-MIT-yellow"></a>
   <img alt="Windows" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D6?logo=windows&logoColor=white">
 </p>
 
@@ -93,6 +95,8 @@ A cada algumas horas o app verifica se há versão nova e avisa pelo ícone do t
 ## 🛠️ Para desenvolvedores
 
 Feito com **.NET 10 + WPF**. Compile com `dotnet build ClaudeWatch.slnx` e rode os testes com `dotnet test ClaudeWatch.slnx`.
+
+Distribuído sob a licença [MIT](LICENSE).
 
 ---
 
