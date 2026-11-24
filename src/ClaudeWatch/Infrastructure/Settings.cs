@@ -10,6 +10,18 @@ public sealed record Settings
     public bool Locked { get; init; }
     public int IntervalSeconds { get; init; } = 60;
     public string? WslCredentialsPath { get; init; }
+
+    /// <summary>
+    /// De onde vêm os limites: <c>"statusline"</c> (oficial, pela statusline do Claude Code)
+    /// ou <c>"api"</c> (endpoint não oficial, com o limite do Fable). Nulo: ainda não escolhido.
+    /// </summary>
+    public string? Source { get; init; }
+}
+
+public static class Sources
+{
+    public const string Statusline = "statusline";
+    public const string Api = "api";
 }
 
 public sealed class SettingsStore(string baseDir)

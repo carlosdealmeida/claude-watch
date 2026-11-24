@@ -38,7 +38,7 @@
 - ✨ **Per-model limits**, such as the weekly **Fable** limit
 - ⏱️ **5-hour session**, on plans that still have it (verified Ultra accounts don't, and the card hides it)
 
-…in a sleek floating card and a colored icon next to your clock. It reads the credential from the **Claude Code** you already have installed — and **never modifies it**.
+…in a sleek floating card and a colored icon next to your clock. It gets your limits from the **Claude Code** you already have installed, through its official status line.
 
 ## ✨ Features
 
@@ -50,6 +50,15 @@
 - 🪟 Start with Windows (optional)
 - 🔔 Notifies you when a new version is available
 - 📦 A single `.exe` — no installer, no runtime
+
+## 🔌 Where the data comes from
+
+ClaudeWatch asks on first run, and you can switch later from the tray icon menu under **Fonte dos dados** (Data source):
+
+- **Claude Code status line (default, official).** ClaudeWatch becomes Claude Code's status line and receives the 5-hour session and the week through the documented path. It never touches your token and never replaces a status line you already have.
+- **Usage API (opt-in, unofficial).** Also brings the Fable limit and where your usage came from, but it calls an undocumented endpoint with the Claude Code token, and Anthropic's terms restrict that use.
+
+The details are in [**How ClaudeWatch reads your limits**](LIMITS.en.md): each source's format, the pace math, and recipes to build your own status line.
 
 ## 📥 Install
 

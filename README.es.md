@@ -38,7 +38,7 @@
 - ✨ **Límites por modelo**, como el semanal de **Fable**
 - ⏱️ **Sesión de 5 horas**, en los planes que aún la tienen (en Ultra verificado no existe y la tarjeta la oculta)
 
-…en una tarjeta flotante elegante y un icono de color junto al reloj. Lee la credencial del **Claude Code** que ya tienes instalado — y **nunca la modifica**.
+…en una tarjeta flotante elegante y un icono de color junto al reloj. Recibe tus límites del **Claude Code** que ya tienes instalado, por su statusline oficial.
 
 ## ✨ Funciones
 
@@ -50,6 +50,15 @@
 - 🪟 Inicia con Windows (opcional)
 - 🔔 Te avisa cuando hay una nueva versión
 - 📦 Un solo `.exe` — sin instalación, sin runtime
+
+## 🔌 De dónde vienen los datos
+
+ClaudeWatch pregunta en la primera ejecución, y puedes cambiarlo después en el menú del icono, en **Fonte dos dados** (Fuente de datos):
+
+- **Statusline de Claude Code (por defecto, oficial).** ClaudeWatch se convierte en la statusline de Claude Code y recibe la sesión de 5h y la semana por el camino documentado. No toca tu token y nunca reemplaza una statusline que ya tengas.
+- **API de uso (opcional, no oficial).** Trae también el límite de Fable y de dónde vino el consumo, pero usa un endpoint sin documentación con el token de Claude Code, y los términos de Anthropic restringen ese uso.
+
+Los detalles están en [**Cómo lee ClaudeWatch tus límites**](LIMITES.es.md): el formato de cada fuente, la cuenta del ritmo y recetas para armar tu propia statusline.
 
 ## 📥 Instalación
 
