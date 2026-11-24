@@ -46,7 +46,8 @@ public sealed class UsagePoller(
     private UsageSnapshot WithState(SnapshotState st) =>
         (_last ?? Empty()) with { State = st };
 
+    // Antes do primeiro dado: um medidor da semana zerado, que todo plano tem.
     private static UsageSnapshot Empty() => new(
-        new Meter("Sessão 5h", 0, null), new Meter("Semana", 0, null),
-        new Meter("Sonnet", 0, null), DateTimeOffset.UtcNow, SnapshotState.Stale);
+        [new Meter("Semana", 0, null) { Key = "weekly_all", Short = "Sem" }],
+        DateTimeOffset.UtcNow, SnapshotState.Stale);
 }

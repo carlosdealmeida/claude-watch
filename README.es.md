@@ -29,15 +29,16 @@
 
 **ClaudeWatch** muestra, en tiempo real y de un vistazo, cuánto has usado de tus límites de Claude:
 
-- ⏱️ **Sesión de 5 horas**
-- 📅 **Semanal**
-- 🧠 **Sonnet semanal**
+- 📅 **Semanal**, el límite que tiene todo plan
+- ✨ **Límites por modelo**, como el semanal de **Fable**
+- ⏱️ **Sesión de 5 horas**, en los planes que aún la tienen (en Ultra verificado no existe y la tarjeta la oculta)
 
 …en una tarjeta flotante elegante y un icono de color junto al reloj. Lee la credencial del **Claude Code** que ya tienes instalado — y **nunca la modifica**.
 
 ## ✨ Funciones
 
 - 🎨 Dos estilos: **Anillos** y **LED** — cambia con un clic
+- 🧭 **Ritmo**: si al ritmo actual un límite se agota antes del reinicio, la tarjeta avisa en ámbar — `⚠ acaba dom 01:16`; si no, muestra cuándo se reinicia — `↻ seg 09:00`
 - 🔢 Icono en la bandeja con el medidor más crítico, según el color de la zona
 - 🚦 Color por nivel: 🟢 verde (&lt;70%) · 🟠 ámbar (70–89%) · 🔴 rojo (≥90%)
 - 📌 Siempre visible, arrastrable, con modo **bloqueado** (clic a través, no estorba)

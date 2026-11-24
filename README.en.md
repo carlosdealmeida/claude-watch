@@ -29,15 +29,16 @@
 
 **ClaudeWatch** shows, in real time and at a glance, how much of your Claude limits you've used:
 
-- ⏱️ **5-hour session**
-- 📅 **Weekly**
-- 🧠 **Weekly Sonnet**
+- 📅 **Weekly**, the limit every plan has
+- ✨ **Per-model limits**, such as the weekly **Fable** limit
+- ⏱️ **5-hour session**, on plans that still have it (verified Ultra accounts don't, and the card hides it)
 
 …in a sleek floating card and a colored icon next to your clock. It reads the credential from the **Claude Code** you already have installed — and **never modifies it**.
 
 ## ✨ Features
 
 - 🎨 Two styles: **Rings** and **LED** — switch with one click
+- 🧭 **Pace**: if a limit would run out before it resets at the current rate, the card warns in amber — `⚠ acaba dom 01:16`; otherwise it shows when it resets — `↻ seg 09:00`
 - 🔢 Tray icon showing the most critical meter, colored by zone
 - 🚦 Color by level: 🟢 green (&lt;70%) · 🟠 amber (70–89%) · 🔴 red (≥90%)
 - 📌 Always on top, draggable, with a **locked** mode (click-through, stays out of your way)

@@ -8,9 +8,22 @@
   <w:NullToCollapsedConverter x:Key="NullToCollapsed"/>
   <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
+  <!-- Linha de dica sob o medidor: reset, ou âmbar quando acaba antes do reset -->
+  <Style x:Key="HintText" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="9.5"/>
+    <Setter Property="Foreground" Value="#8CFFFFFF"/>
+    <Setter Property="Text" Value="{Binding Hint}"/>
+    <Setter Property="Visibility" Value="{Binding Hint, Converter={StaticResource NullToCollapsed}}"/>
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding Warn}" Value="True">
+        <Setter Property="Foreground" Value="#E8A23D"/>
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
+
   <!-- Skin A — um anel -->
   <DataTemplate x:Key="MeterRing">
-    <StackPanel Width="76" HorizontalAlignment="Center">
+    <StackPanel MinWidth="76" Margin="4,0" HorizontalAlignment="Center">
       <Grid Width="56" Height="56" HorizontalAlignment="Center">
         <Ellipse Stroke="#24FFFFFF" StrokeThickness="6" Margin="3"/>
         <Path Stroke="{Binding Pct, Converter={StaticResource PctBrush}}"
@@ -22,20 +35,24 @@
       </Grid>
       <TextBlock Text="{Binding Label}" Foreground="#BDFFFFFF" FontSize="10.5"
                  HorizontalAlignment="Center" Margin="0,7,0,0"/>
+      <TextBlock Style="{StaticResource HintText}" HorizontalAlignment="Center" Margin="0,2,0,0"/>
     </StackPanel>
   </DataTemplate>
 
   <DataTemplate x:Key="SkinAneis">
-    <StackPanel Orientation="Horizontal" Width="236">
-      <ContentControl Content="{Binding Snapshot.FiveHour}" ContentTemplate="{StaticResource MeterRing}"/>
-      <ContentControl Content="{Binding Snapshot.Week}" ContentTemplate="{StaticResource MeterRing}"/>
-      <ContentControl Content="{Binding Snapshot.Sonnet}" ContentTemplate="{StaticResource MeterRing}"/>
-    </StackPanel>
+    <!-- Quantos anéis houver no plano: 2 no Ultra (Semana, Fable), 3 no Max (+ Sessão 5h) -->
+    <ItemsControl ItemsSource="{Binding Snapshot.Meters}" ItemTemplate="{StaticResource MeterRing}"
+                  HorizontalAlignment="Center" MinWidth="236">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate><StackPanel Orientation="Horizontal" HorizontalAlignment="Center"/></ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+    </ItemsControl>
   </DataTemplate>
 
   <!-- Skin E — LED/equalizador -->
   <DataTemplate x:Key="LedRow">
     <Grid Margin="0,6" Width="240">
+      <Grid.RowDefinitions><RowDefinition/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="48"/><ColumnDefinition Width="*"/><ColumnDefinition Width="30"/>
       </Grid.ColumnDefinitions>
@@ -77,14 +94,12 @@
       <TextBlock Grid.Column="2" Text="{Binding Pct, StringFormat={}{0}%}" FontSize="11"
                  FontWeight="SemiBold" TextAlignment="Right" VerticalAlignment="Center"
                  Foreground="{Binding Pct, Converter={StaticResource PctBrush}}"/>
+      <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Style="{StaticResource HintText}"
+                 HorizontalAlignment="Right" Margin="0,3,0,0"/>
     </Grid>
   </DataTemplate>
 
   <DataTemplate x:Key="SkinLed">
-    <StackPanel>
-      <ContentControl Content="{Binding Snapshot.FiveHour}" ContentTemplate="{StaticResource LedRow}"/>
-      <ContentControl Content="{Binding Snapshot.Week}" ContentTemplate="{StaticResource LedRow}"/>
-      <ContentControl Content="{Binding Snapshot.Sonnet}" ContentTemplate="{StaticResource LedRow}"/>
-    </StackPanel>
+    <ItemsControl ItemsSource="{Binding Snapshot.Meters}" ItemTemplate="{StaticResource LedRow}"/>
   </DataTemplate>
 </ResourceDictionary>

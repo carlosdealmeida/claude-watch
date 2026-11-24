@@ -15,11 +15,15 @@ public class ZoneRulesTests
         var s = Snapshots.Of(42, 78, 96);
         Assert.Equal("Sonnet", s.Worst.Label);
     }
+
+    [Fact]
+    public void Worst_sem_medidores_nao_quebra() =>
+        Assert.Equal(0, new UsageSnapshot([], DateTimeOffset.UtcNow, SnapshotState.Stale).Worst.Pct);
 }
 
 public static class Snapshots
 {
     public static UsageSnapshot Of(int h5, int sem, int sonnet, SnapshotState st = SnapshotState.Ok) =>
-        new(new Meter("Sessão 5h", h5, null), new Meter("Semana", sem, null),
-            new Meter("Sonnet", sonnet, null), DateTimeOffset.UtcNow, st);
+        new([new Meter("Sessão 5h", h5, null) { Short = "5h" }, new Meter("Semana", sem, null) { Short = "Sem" },
+             new Meter("Sonnet", sonnet, null) { Short = "Sonnet" }], DateTimeOffset.UtcNow, st);
 }

@@ -49,6 +49,6 @@ public class UsagePollerTests
         ok = false;
         await p.TickAsync(default);
         Assert.Equal(SnapshotState.Stale, published!.State);
-        Assert.Equal(96, published.Sonnet.Pct); // dados antigos preservados
+        Assert.Equal(96, published.Meters[2].Pct); // dados antigos preservados
     }
 }
