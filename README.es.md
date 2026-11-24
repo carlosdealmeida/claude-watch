@@ -102,6 +102,8 @@ Cada pocas horas la app comprueba si hay una versión nueva y te avisa por el ic
 
 Hecho con **.NET 10 + WPF**. Compila con `dotnet build ClaudeWatch.slnx` y ejecuta las pruebas con `dotnet test ClaudeWatch.slnx`.
 
+Las capturas de arriba salen de `tools\capturar-estilos.cmd -Assets`: el script abre la app en modo demo (`CLAUDEWATCH_SHOWROOM`, sin datos reales), captura cada estilo sobre un fondo liso y actualiza `assets/`. Compila en Release antes.
+
 Distribuido bajo la licencia [MIT](LICENSE).
 
 ---

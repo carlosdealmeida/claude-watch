@@ -102,6 +102,8 @@ Every few hours the app checks for a new version and notifies you via the tray i
 
 Built with **.NET 10 + WPF**. Build with `dotnet build ClaudeWatch.slnx` and run the tests with `dotnet test ClaudeWatch.slnx`.
 
+The screenshots above come from `tools\capturar-estilos.cmd -Assets`: the script opens the app in demo mode (`CLAUDEWATCH_SHOWROOM`, no real data), captures each style over a plain background and updates `assets/`. Build in Release first.
+
 Released under the [MIT](LICENSE) license.
 
 ---
