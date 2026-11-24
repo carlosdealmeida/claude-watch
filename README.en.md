@@ -20,12 +20,17 @@
 </p>
 
 <p align="center">
-  <img src="assets/aneis.png" alt="Rings skin" width="330">
+  <img src="assets/aneis.png" alt="Rings style" width="300">
   &nbsp;&nbsp;
-  <img src="assets/led.png" alt="LED skin" width="330">
+  <img src="assets/barras.png" alt="Bars style" width="300">
+</p>
+<p align="center">
+  <img src="assets/led.png" alt="LED style" width="300">
+  &nbsp;&nbsp;
+  <img src="assets/compacto.png" alt="Compact style" width="350">
 </p>
 
-<p align="center"><sub>The two styles: <b>Rings</b> and <b>LED</b> · 🟢 &lt;70% · 🟠 70–89% · 🔴 ≥90%</sub></p>
+<p align="center"><sub>The four styles: <b>Rings</b>, <b>Bars</b>, <b>LED</b> and <b>Compact</b> · 🟢 &lt;70% · 🟠 70–89% or runs out before the reset · 🔴 ≥90%</sub></p>
 
 **ClaudeWatch** shows, in real time and at a glance, how much of your Claude limits you've used:
 
