@@ -20,12 +20,17 @@
 </p>
 
 <p align="center">
-  <img src="assets/aneis.png" alt="Estilo Anillos" width="330">
+  <img src="assets/aneis.png" alt="Estilo Anillos" width="300">
   &nbsp;&nbsp;
-  <img src="assets/led.png" alt="Estilo LED" width="330">
+  <img src="assets/barras.png" alt="Estilo Barras" width="300">
+</p>
+<p align="center">
+  <img src="assets/led.png" alt="Estilo LED" width="300">
+  &nbsp;&nbsp;
+  <img src="assets/compacto.png" alt="Estilo Compacto" width="350">
 </p>
 
-<p align="center"><sub>Los dos estilos: <b>Anillos</b> y <b>LED</b> · 🟢 &lt;70% · 🟠 70–89% · 🔴 ≥90%</sub></p>
+<p align="center"><sub>Los cuatro estilos: <b>Anillos</b>, <b>Barras</b>, <b>LED</b> y <b>Compacto</b> · 🟢 &lt;70% · 🟠 70–89% o se acaba antes del reinicio · 🔴 ≥90%</sub></p>
 
 **ClaudeWatch** muestra, en tiempo real y de un vistazo, cuánto has usado de tus límites de Claude:
 
@@ -105,6 +110,8 @@ Cada pocas horas la app comprueba si hay una versión nueva y te avisa por el ic
 ## 🛠️ Para desarrolladores
 
 Hecho con **.NET 10 + WPF**. Compila con `dotnet build ClaudeWatch.slnx` y ejecuta las pruebas con `dotnet test ClaudeWatch.slnx`.
+
+Las capturas de arriba salen de `tools\capturar-estilos.cmd -Assets`: el script abre la app en modo demo (`CLAUDEWATCH_SHOWROOM`, sin datos reales), captura cada estilo sobre un fondo liso y actualiza `assets/`. Compila en Release antes.
 
 Distribuido bajo la licencia [MIT](LICENSE).
 
