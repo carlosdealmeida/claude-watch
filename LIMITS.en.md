@@ -82,6 +82,7 @@ $in = $raw | ConvertFrom-Json
 
 - **No Fable limit**, and no other per-model limits. For those, only the usage API.
 - **Updates only while you use Claude Code.** When idle, the widget shows the last value and when it arrived.
+- **Data comes from Claude Code in the terminal** (`claude`). In the VS Code extension panel, the status line was not called in our test (Nov 2026). If the widget stays on "Aguardando o Claude Code", open a `claude` session in a terminal and send a message: the limits arrive with the first response.
 - **Claude Code inside WSL** uses a different `settings.json`. There the setup is manual.
 - **If you move the `.exe`**, ClaudeWatch fixes the path the next time it starts.
 

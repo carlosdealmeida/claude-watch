@@ -82,6 +82,7 @@ $in = $raw | ConvertFrom-Json
 
 - **Não traz o limite do Fable** nem outros limites por modelo. Para eles, só a API de uso.
 - **Só atualiza enquanto você usa o Claude Code.** Parado, o widget mostra o último valor e o horário em que ele chegou.
+- **Os dados chegam pelo Claude Code no terminal** (`claude`). No painel da extensão do VS Code, a statusline não foi chamada no nosso teste (nov/2026). Se o widget ficar em "Aguardando o Claude Code", abra uma sessão do `claude` num terminal e mande uma mensagem: os limites chegam com a primeira resposta.
 - **O Claude Code dentro do WSL** usa outro `settings.json`. Nesse caso a configuração é manual.
 - **Se você mover o `.exe`**, o ClaudeWatch corrige o caminho na próxima vez que abrir.
 
