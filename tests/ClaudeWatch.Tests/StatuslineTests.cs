@@ -11,21 +11,25 @@ public class StatuslineTests
 
     // O JSON que o Claude Code passa no stdin da statusline (recortado). rate_limits segue
     // https://code.claude.com/docs/en/statusline — cada janela pode faltar.
-    private static string Stdin(string rateLimits) => $$"""
+    private static string Stdin(string rateLimits) => J("""
     {"session_id":"abc","cwd":"C:/projetos/segredo","model":{"display_name":"Fable 5.2"},
-     "rate_limits":{{rateLimits}}}
-    """;
+     "rate_limits":RATE_LIMITS}
+    """).Replace("RATE_LIMITS", J(rateLimits));
+
+    /// <summary>Troca os marcadores pelos epochs (interpolação em raw string brigaria com as chaves do JSON).</summary>
+    private static string J(string json) =>
+        json.Replace("RESET_WEEK", ResetWeek.ToString()).Replace("RESET_SESSION", ResetSession.ToString());
 
     private static string TempFile() => Path.Combine(Path.GetTempPath(), "cw-" + Guid.NewGuid(), "statusline.json");
 
     [Fact]
     public void Parser_le_janelas_em_epoch()
     {
-        var json = $$"""
+        var json = J("""
         {"captured_at":"2026-11-24T12:30:00+00:00",
-         "rate_limits":{"five_hour":{"used_percentage":23.5,"resets_at":{{ResetSession}}},
-                        "seven_day":{"used_percentage":41.2,"resets_at":{{ResetWeek}}}}}
-        """;
+         "rate_limits":{"five_hour":{"used_percentage":23.5,"resets_at":RESET_SESSION},
+                        "seven_day":{"used_percentage":41.2,"resets_at":RESET_WEEK}}}
+        """);
         var s = StatuslineParser.Parse(json, Now, TimeZoneInfo.Utc);
         Assert.Equal(new[] { "Sessão 5h", "Semana" }, s.Meters.Select(m => m.Label));
         Assert.Equal(new[] { 24, 41 }, s.Meters.Select(m => m.Pct));
@@ -36,7 +40,7 @@ public class StatuslineTests
     [Fact]
     public void Ultra_sem_sessao_mostra_so_a_semana()
     {
-        var json = $$"""{"rate_limits":{"seven_day":{"used_percentage":12,"resets_at":{{ResetWeek}}}}}""";
+        var json = J("""{"rate_limits":{"seven_day":{"used_percentage":12,"resets_at":RESET_WEEK}}}""");
         var s = StatuslineParser.Parse(json, Now, TimeZoneInfo.Utc);
         Assert.Equal("Semana", s.Meters.Single().Label);
     }
@@ -44,7 +48,7 @@ public class StatuslineTests
     [Fact]
     public void Janela_que_ja_virou_recomeca_do_zero()
     {
-        var json = $$"""{"rate_limits":{"five_hour":{"used_percentage":90,"resets_at":{{ResetSession}}}}}""";
+        var json = J("""{"rate_limits":{"five_hour":{"used_percentage":90,"resets_at":RESET_SESSION}}}""");
         var m = StatuslineParser.Parse(json, Now.AddHours(3), TimeZoneInfo.Utc).Meters.Single();
         Assert.Equal(0, m.Pct);
         Assert.Null(m.ResetAt);
@@ -54,7 +58,7 @@ public class StatuslineTests
     public void Ponte_grava_so_os_limites()
     {
         var path = TempFile();
-        StatuslineBridge.Capture(Stdin($$"""{"seven_day":{"used_percentage":12,"resets_at":{{ResetWeek}}}}"""), path, Now, print: false);
+        StatuslineBridge.Capture(Stdin("""{"seven_day":{"used_percentage":12,"resets_at":RESET_WEEK}}"""), path, Now, print: false);
         var saved = JsonNode.Parse(File.ReadAllText(path))!.AsObject();
         Assert.Equal(new[] { "captured_at", "rate_limits" }, saved.Select(p => p.Key).OrderBy(k => k));
         Assert.DoesNotContain("segredo", File.ReadAllText(path));
@@ -64,7 +68,7 @@ public class StatuslineTests
     public void Ponte_nao_apaga_o_ultimo_dado_quando_a_sessao_ainda_nao_tem_limites()
     {
         var path = TempFile();
-        StatuslineBridge.Capture(Stdin($$"""{"seven_day":{"used_percentage":12,"resets_at":{{ResetWeek}}}}"""), path, Now, print: false);
+        StatuslineBridge.Capture(Stdin("""{"seven_day":{"used_percentage":12,"resets_at":RESET_WEEK}}"""), path, Now, print: false);
         var antes = File.ReadAllText(path);
         var line = StatuslineBridge.Capture("""{"session_id":"nova","cwd":"x"}""", path, Now.AddMinutes(5), print: true);
         Assert.Equal(antes, File.ReadAllText(path));
@@ -75,7 +79,7 @@ public class StatuslineTests
     public void Ponte_imprime_a_linha_dos_limites()
     {
         var line = StatuslineBridge.Capture(
-            Stdin($$"""{"seven_day":{"used_percentage":12,"resets_at":{{ResetWeek}}}}"""), TempFile(), Now, print: true);
+            Stdin("""{"seven_day":{"used_percentage":12,"resets_at":RESET_WEEK}}"""), TempFile(), Now, print: true);
         Assert.StartsWith("Sem 12%", line);
     }
 
