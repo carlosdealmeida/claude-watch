@@ -12,7 +12,7 @@ A fonte padrão passa a ser a **statusline do Claude Code**, o caminho documenta
 ### v0.4.0 — Limites dinâmicos e ritmo
 O cartão mostra os limites que o plano tem de fato, lidos do array `limits` da resposta: no Ultra verificado, **Semana** e **Fable**, sem a sessão de 5h. Cada medidor projeta, pelo ritmo da janela atual, se acaba antes do reset (`⚠ acaba dom 01:16`) ou mostra quando reseta (`↻ seg 09:00`). Cobre a parte do reset semanal da [#2](https://github.com/carlosdealmeida/claude-watch/issues/2).
 
-Três estilos novos para escolher no tray ([#12](https://github.com/carlosdealmeida/claude-watch/issues/12)): **Anéis** concêntricos, **Barras** com a fatia do Fable dentro da semana ([#11](https://github.com/carlosdealmeida/claude-watch/issues/11)) e **Compacto**, cujo detalhe ao passar o mouse mostra de onde veio o consumo da semana ([#10](https://github.com/carlosdealmeida/claude-watch/issues/10)). O ícone do tray destaca o limite que acaba antes do reset, em âmbar mesmo com percentual baixo.
+Três estilos novos para escolher no tray ([#12](https://github.com/carlosdealmeida/claude-watch/issues/12)): **Anéis** concêntricos, **Barras** com a fatia do Fable dentro da semana ([#11](https://github.com/carlosdealmeida/claude-watch/issues/11)) e **Compacto**, cujo detalhe ao passar o mouse mostra de onde veio o consumo da semana ([#10](https://github.com/carlosdealmeida/claude-watch/issues/10), em parte). O ícone do tray destaca o limite que acaba antes do reset, em âmbar mesmo com percentual baixo.
 
 ### v0.3.0 — Reset da sessão de 5h no cartão
 Linha `↻ reseta às HH:mm` no rodapé do cartão (ambos os skins), some quando não há reset. Ataca diretamente a confusão de _"quando volta a poder usar"_ (claude-code#6679).
@@ -20,16 +20,22 @@ Linha `↻ reseta às HH:mm` no rodapé do cartão (ambos os skins), some quando
 ### v0.2.0 / v0.1.0 — Base
 Widget flutuante, ícone no tray com o medidor mais crítico, dois skins (Anéis e LED), zonas por cor, leitura da credencial do Claude Code, aviso de nova versão, single-file `.exe`.
 
-## 🎯 v0.4 — Aviso antecipado e reset mais rico
+## 🎯 v0.6 — Aviso antecipado
 
+Funciona com as duas fontes, inclusive a oficial: só precisa do percentual e do horário do reset.
+
+- **[#2](https://github.com/carlosdealmeida/claude-watch/issues/2) — Contagem regressiva do reset.** `↻ seg 09:00 (em 2h13)`, atualizando sozinha. O reset semanal e o ritmo já saíram na v0.4.0 (claude-code#6679, #3626, #4267, #13354).
 - **[#1](https://github.com/carlosdealmeida/claude-watch/issues/1) — Notificação proativa ao cruzar zona.** Toast do Windows (+ som opcional) quando um medidor cruza 70% / 90%, disparado só na transição. Responde à dor nº 1: ser pego de surpresa pelo limite (claude-code#16157, #38335, #45756, #41788, #9424).
-- **[#2](https://github.com/carlosdealmeida/claude-watch/issues/2) — Contagem regressiva + reset da semana.** `↻ reseta às 14:30 (em 2h13)` e o reset semanal. Estende a v0.3.0 (claude-code#6679, #3626, #4267, #13354).
 
-## 🎯 v0.5 — Números e cobrança extra
+## 🎯 v0.7 — Pela API de uso
 
+Só com a API de uso, a fonte opcional e não oficial: a statusline do Claude Code não traz esses dados.
+
+- **[#5](https://github.com/carlosdealmeida/claude-watch/issues/5) — Indicador de "extra usage" ativo.** Sinaliza quando se está em cobrança extra vs cota do plano (claude-code#52467, #47353, #45035). O bucket já chega na resposta.
+- **[#10](https://github.com/carlosdealmeida/claude-watch/issues/10) — De onde vem o consumo (o que falta).** `percent_of_limit`, o horário dos dados e o detalhe nos estilos Anéis, Barras e LED.
+- **[#13](https://github.com/carlosdealmeida/claude-watch/issues/13) — Campos novos da resposta.** `pace`, `severity`, `is_active` e os valores em dólares, com respostas de contas Max e Pro.
 - **[#3](https://github.com/carlosdealmeida/claude-watch/issues/3) — Spike: o endpoint expõe tokens/custo?** Investigação que decide a viabilidade da #4 antes de prometer.
 - **[#4](https://github.com/carlosdealmeida/claude-watch/issues/4) — Mostrar tokens/custo.** Números absolutos no tooltip ou modo expandido (claude-code#11008, #9293, #1287). _Depende da #3._
-- **[#5](https://github.com/carlosdealmeida/claude-watch/issues/5) — Indicador de "extra usage" ativo.** Sinaliza quando se está em cobrança extra vs cota do plano (claude-code#52467, #47353, #45035). O bucket já chega na resposta.
 
 ## 🔮 Futuro
 
