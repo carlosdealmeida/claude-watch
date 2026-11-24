@@ -18,7 +18,16 @@ public class TooltipFormatterTests
             [new Meter("Sessão 5h", 42, now.AddHours(3)) { Short = "5h" },
              new Meter("Semana", 20, now.AddDays(3)) { Short = "Sem" }],
             now, SnapshotState.Ok);
-        Assert.Equal("5h 42% (reset 15:00) · Sem 20%", TooltipFormatter.Format(s, TimeZoneInfo.Utc));
+        Assert.Equal("5h 42% (reset em 3h) · Sem 20%", TooltipFormatter.Format(s, TimeZoneInfo.Utc));
+    }
+
+    [Fact]
+    public void Conta_a_partir_da_hora_passada_e_nao_da_coleta()
+    {
+        var coleta = new DateTimeOffset(2026, 6, 11, 12, 0, 0, TimeSpan.Zero);
+        var s = new UsageSnapshot([new Meter("Sessão 5h", 42, coleta.AddHours(3)) { Short = "5h" }],
+            coleta, SnapshotState.Ok);
+        Assert.Equal("5h 42% (reset em 1h)", TooltipFormatter.Format(s, TimeZoneInfo.Utc, coleta.AddHours(2)));
     }
 
     [Fact]

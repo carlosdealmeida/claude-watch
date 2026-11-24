@@ -51,7 +51,7 @@ public static class StatuslineBridge
 
         if (!print) return null;
         if (saved is null) return "ClaudeWatch · aguardando a primeira resposta";
-        var line = TooltipFormatter.Format(StatuslineParser.Parse(saved.ToJsonString(), now));
+        var line = TooltipFormatter.Format(StatuslineParser.Parse(saved.ToJsonString(), now), now: now);
         return line == "ClaudeWatch" ? "ClaudeWatch · sem limites nesta conta" : line;
     }
 

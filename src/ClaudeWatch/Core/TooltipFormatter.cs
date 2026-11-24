@@ -7,18 +7,19 @@ namespace ClaudeWatch.Core;
 /// </summary>
 public static class TooltipFormatter
 {
-    public static string Format(UsageSnapshot s, TimeZoneInfo? tz = null)
+    /// <param name="now">A hora da contagem do reset; sem ela, a da coleta.</param>
+    public static string Format(UsageSnapshot s, TimeZoneInfo? tz = null, DateTimeOffset? now = null)
     {
         var zone = tz ?? TimeZoneInfo.Local;
-        var now = s.CollectedAt;
+        var at = now ?? s.CollectedAt;
         var anyWarn = s.Meters.Any(m => m.Warn);
 
         var parts = s.Meters.Select((m, i) =>
         {
             var extra =
                 m.Exhausted ? " (esgotado)"
-                : m.RunsOutAt is { } eta ? $" (acaba {MeterHints.When(eta, now, zone)})"
-                : i == 0 && !anyWarn && m.ResetAt is { } r ? $" (reset {MeterHints.When(r, now, zone)})"
+                : m.RunsOutAt is { } eta ? $" (acaba {MeterHints.When(eta, at, zone)})"
+                : i == 0 && !anyWarn && m.ResetAt is { } r ? $" (reset {MeterHints.Until(r, at, zone)})"
                 : "";
             return $"{m.Short} {m.Pct}%{extra}";
         });

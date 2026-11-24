@@ -163,7 +163,7 @@ elapsed   = now − window_start
 runs_out  = now + elapsed × (100 − usage) / usage
 ```
 
-This assumes you keep the same average pace as the window so far. If `runs_out` lands **before** the reset, the limit runs out first, and ClaudeWatch shows `⚠ acaba dom 01:16` (runs out Sun 01:16) in amber. Otherwise it shows when it resets: `↻ seg 09:00` (Mon 09:00).
+This assumes you keep the same average pace as the window so far. If `runs_out` lands **before** the reset, the limit runs out first, and ClaudeWatch shows `⚠ acaba dom 01:16` (runs out Sun 01:16) in amber. Otherwise it shows when it resets: `↻ seg 09:00` (Mon 09:00), or, when that's under 24h away, how long is left: `↻ em 2h13` (in 2h13; also `esgotado · volta em 2h13`, used up · back in 2h13). The countdown rounds up and ticks every minute, even without a new reading. `⚠ acaba` always stays a clock time: it's a projection, and "in 3h" would give it a precision it doesn't have.
 
 **A real example.** The week started on Monday at 09:00 and it's now Tuesday at 09:31, so 24.5 h have passed. Fable is at 18%:
 

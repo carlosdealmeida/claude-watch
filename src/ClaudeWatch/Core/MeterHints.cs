@@ -22,11 +22,33 @@ public static class MeterHints
     {
         var runsOut = RunsOutAt(m, now);
         var hint =
-            m.Exhausted ? (m.ResetAt is { } r1 ? $"esgotado · volta {When(r1, now, tz)}" : "esgotado")
+            m.Exhausted ? (m.ResetAt is { } r1 ? $"esgotado · volta {Until(r1, now, tz)}" : "esgotado")
+            // A projeção fica no horário: "em 3h" daria a ela uma precisão que não tem.
             : runsOut is { } eta ? $"⚠ acaba {When(eta, now, tz)}"
-            : m.ResetAt is { } r2 ? $"↻ {When(r2, now, tz)}"
+            : m.ResetAt is { } r2 ? $"↻ {Until(r2, now, tz)}"
             : null;
         return m with { RunsOutAt = runsOut, Hint = hint };
+    }
+
+    /// <summary>
+    /// Recalcula as linhas com a hora de agora, para a contagem andar entre uma leitura e
+    /// outra (e quando a leitura falha e o último dado é reaproveitado).
+    /// </summary>
+    public static UsageSnapshot Refresh(UsageSnapshot s, DateTimeOffset now, TimeZoneInfo tz) =>
+        s with { Meters = s.Meters.Select(m => Annotate(m, now, tz)).ToList() };
+
+    /// <summary>
+    /// "em 2h13" quando falta menos de 24h; mais longe que isso (ou já passado),
+    /// o horário de <see cref="When"/>. Arredonda para cima: nunca diz que volta antes da hora.
+    /// </summary>
+    public static string Until(DateTimeOffset t, DateTimeOffset now, TimeZoneInfo tz)
+    {
+        var left = t - now;
+        if (left <= TimeSpan.Zero || left >= TimeSpan.FromHours(24)) return When(t, now, tz);
+        var mins = (int)Math.Ceiling(left.TotalMinutes);
+        return mins < 60 ? $"em {mins}min"
+            : mins % 60 == 0 ? $"em {mins / 60}h"
+            : $"em {mins / 60}h{mins % 60:00}";
     }
 
     /// <summary>
