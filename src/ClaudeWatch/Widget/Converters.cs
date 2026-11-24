@@ -35,10 +35,12 @@ public sealed class PctToStarConverter : IValueConverter
     public object ConvertBack(object v, Type t, object p, CultureInfo c) => throw new NotSupportedException();
 }
 
+/// <summary>Medidor (ou só o percentual) → os 15 LEDs, já com o âmbar do aviso de ritmo.</summary>
 public sealed class LedSegmentsConverter : IValueConverter
 {
-    public object Convert(object v, Type t, object p, CultureInfo c) =>
-        LedScale.Build(System.Convert.ToInt32(v));
+    public object Convert(object v, Type t, object p, CultureInfo c) => v is Meter m
+        ? LedScale.Build(m.Pct, m.Warn)
+        : LedScale.Build(System.Convert.ToInt32(v));
     public object ConvertBack(object v, Type t, object p, CultureInfo c) => throw new NotSupportedException();
 }
 

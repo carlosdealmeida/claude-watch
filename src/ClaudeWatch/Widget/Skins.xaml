@@ -188,11 +188,15 @@
   <DataTemplate x:Key="LedRow">
     <Grid Margin="0,6" Width="240">
       <Grid.RowDefinitions><RowDefinition/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+      <!-- rótulo com o nome completo; a coluna acompanha o maior nome e alinha as linhas -->
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="48"/><ColumnDefinition Width="*"/><ColumnDefinition Width="30"/>
+        <ColumnDefinition Width="Auto" MinWidth="48" SharedSizeGroup="LedLabel"/>
+        <ColumnDefinition Width="*"/><ColumnDefinition Width="30"/>
       </Grid.ColumnDefinitions>
-      <TextBlock Text="{Binding Short}" Foreground="#C7FFFFFF" FontSize="10.5" VerticalAlignment="Center"/>
-      <ItemsControl Grid.Column="1" ItemsSource="{Binding Pct, Converter={StaticResource LedSegs}}"
+      <TextBlock Text="{Binding Label}" Foreground="#C7FFFFFF" FontSize="10.5" VerticalAlignment="Center"
+                 Margin="0,0,8,0"/>
+      <!-- recebe o medidor inteiro: com aviso de ritmo, o verde dos LEDs vira âmbar -->
+      <ItemsControl Grid.Column="1" ItemsSource="{Binding Converter={StaticResource LedSegs}}"
                     VerticalAlignment="Center">
         <ItemsControl.ItemsPanel>
           <ItemsPanelTemplate><UniformGrid Rows="1" /></ItemsPanelTemplate>
@@ -235,6 +239,7 @@
   </DataTemplate>
 
   <DataTemplate x:Key="SkinLed">
-    <ItemsControl ItemsSource="{Binding Snapshot.Meters}" ItemTemplate="{StaticResource LedRow}"/>
+    <ItemsControl ItemsSource="{Binding Snapshot.Meters}" ItemTemplate="{StaticResource LedRow}"
+                  Grid.IsSharedSizeScope="True"/>
   </DataTemplate>
 </ResourceDictionary>

@@ -27,7 +27,13 @@ public sealed record Meter(string Label, int Pct, DateTimeOffset? ResetAt)
     /// <summary>Nome do limite da fatia ("Fable").</summary>
     public string? PartLabel { get; init; }
 
-    public string? PartText => Part is { } p && PartLabel is { } l ? $"{l} {p} de {Pct}%" : null;
+    /// <summary>Legenda da fatia sob a barra; com teto, explica o tique ("Fable 9% · teto 50%").</summary>
+    public string? PartText => (Part, PartLabel, PartCap) switch
+    {
+        ({ } p, { } l, { } cap) => $"{l} {p}% · teto {cap}%",
+        ({ } p, { } l, _) => $"{l} {p}% da semana",
+        _ => null,
+    };
 
     public Zone Zone => ZoneRules.From(Pct);
     /// <summary>A zona do percentual, mas âmbar quando o ritmo esgota antes do reset.</summary>

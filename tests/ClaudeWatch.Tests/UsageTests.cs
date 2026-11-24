@@ -76,9 +76,15 @@ public class UsageTests
         var s = UsageResponseParser.Parse(Ultra, UltraNow, Brt);
         var semana = s.Find("weekly_all")!;
         Assert.Equal((9, 50, "Fable"), (semana.Part, semana.PartCap, semana.PartLabel));
-        Assert.Equal("Fable 9 de 12%", semana.PartText);
+        // o texto explica o tique da barra: quanto o Fable já usou da semana e até onde pode ir
+        Assert.Equal("Fable 9% · teto 50%", semana.PartText);
         Assert.Null(s.Find("weekly_scoped:fable")!.Part);
     }
+
+    [Fact]
+    public void Fatia_sem_teto_mostra_so_o_quanto_usou() =>
+        Assert.Equal("Fable 9% da semana",
+            new Meter("Semana", 12, null) { Part = 9, PartLabel = "Fable" }.PartText);
 
     [Fact]
     public void Breakdown_ignora_linhas_zeradas()
