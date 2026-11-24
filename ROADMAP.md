@@ -6,6 +6,9 @@ O acompanhamento detalhado de cada item está nas [issues](https://github.com/ca
 
 ## ✅ Entregue
 
+### v0.5.0 — Fonte oficial e documentação dos limites
+A fonte padrão passa a ser a **statusline do Claude Code**, o caminho documentado: o ClaudeWatch vira a statusline, grava só os limites e não toca no token. A API de uso continua disponível como opção, com aviso. Nova documentação em [LIMITES.md](LIMITES.md), com o formato das duas fontes, a conta do ritmo e receitas de statusline.
+
 ### v0.4.0 — Limites dinâmicos e ritmo
 O cartão mostra os limites que o plano tem de fato, lidos do array `limits` da resposta: no Ultra verificado, **Semana** e **Fable**, sem a sessão de 5h. Cada medidor projeta, pelo ritmo da janela atual, se acaba antes do reset (`⚠ acaba dom 01:16`) ou mostra quando reseta (`↻ seg 09:00`). Cobre a parte do reset semanal da [#2](https://github.com/carlosdealmeida/claude-watch/issues/2).
 

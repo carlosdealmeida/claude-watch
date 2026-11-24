@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net.Http;
 using System.Windows;
 using ClaudeWatch.Core;
@@ -12,14 +13,25 @@ public partial class App : Application
 {
     private TrayController? _tray;
     private WidgetWindow? _window;
-    private FileCredentialFile? _credFile;
+    private FileCredentialFile? _credFile, _statuslineFile;
     private CancellationTokenSource? _cts;
     private Mutex? _mutex;
     private EventWaitHandle? _showSignal;
+    private string _source = Sources.Statusline;
+
+    private static readonly string Home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+    private static string ClaudeSettings => ClaudeStatuslineSetup.SettingsPath(Home);
 
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        // Chamado pelo Claude Code como statusline: grava os limites e sai, sem abrir nada.
+        if (e.Args.Contains(StatuslineBridge.Arg) || e.Args.Contains(StatuslineBridge.CaptureArg))
+        {
+            Shutdown(StatuslineBridge.Run(print: !e.Args.Contains(StatuslineBridge.CaptureArg)));
+            return;
+        }
 
         _mutex = new Mutex(true, @"Global\ClaudeWatch.Widget", out var first);
         _showSignal = new EventWaitHandle(false, EventResetMode.AutoReset, @"Global\ClaudeWatch.Show");
@@ -34,29 +46,57 @@ public partial class App : Application
         var log = new FileLogger(AppPaths.LogsDir);
         var store = new SettingsStore(AppPaths.BaseDir);
         var settings = store.Load();
+        Directory.CreateDirectory(AppPaths.BaseDir);
 
-        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        _credFile = new FileCredentialFile(CredentialPaths.Resolve(home, settings));
+        // Primeira execução (ou atualização vinda da v0.3): perguntar a fonte uma vez.
+        // Fechar a janela sem escolher não é consentimento para mexer no settings.json do
+        // Claude Code: segue com a fonte oficial sem configurar nada e pergunta de novo depois.
+        var askedNow = false;
+        if (settings.Source is null)
+        {
+            var dialog = new SourceDialog();
+            if (dialog.ShowDialog() == true && dialog.Choice is { } chosen)
+            {
+                settings = settings with { Source = chosen };
+                store.Save(settings);
+                askedNow = true;
+            }
+        }
+        _source = settings.Source ?? Sources.Statusline;
+
+        _credFile = new FileCredentialFile(CredentialPaths.Resolve(Home, settings));
+        _statuslineFile = new FileCredentialFile(StatuslineBridge.DataPath);
         var http = new HttpClient();
         var pipeline = new CredentialPipeline(_credFile);
         var usage = new UsageClient(http);
 
         var vm = new WidgetViewModel { Skin = settings.Skin };
         _window = new WidgetWindow(store, settings) { DataContext = vm };
-        _tray = new TrayController(settings.Locked, Autostart.IsEnabled(), settings.Skin);
+        _tray = new TrayController(settings.Locked, Autostart.IsEnabled(), settings.Skin, _source);
+
+        if (settings.Source == Sources.Statusline) EnsureStatusline(silentWhenDone: !askedNow);
 
         var demo = Showroom.Mode is not null;
         var poller = new UsagePoller(
             getToken: demo ? _ => Task.FromResult(new TokenResult("demo", SnapshotState.Ok))
-                           : ct => pipeline.GetAccessTokenAsync(DateTimeOffset.UtcNow, ct),
+                     : ct => _source == Sources.Api
+                         ? pipeline.GetAccessTokenAsync(DateTimeOffset.UtcNow, ct)
+                         : Task.FromResult(_statuslineFile.ReadOrNull() is null
+                             ? new TokenResult(null, SnapshotState.WaitingStatusline)
+                             : new TokenResult("statusline", SnapshotState.Ok)),
             fetch: demo ? (_, _) => Task.FromResult(Showroom.Snapshot())
-                        : usage.FetchAsync,
+                  : (token, ct) => _source == Sources.Api
+                      ? usage.FetchAsync(token, ct)
+                      : Task.FromResult(StatuslineParser.Parse(
+                          _statuslineFile.ReadOrNull() ?? throw new FileNotFoundException(StatuslineBridge.DataPath),
+                          DateTimeOffset.Now)),
             publish: s => Dispatcher.Invoke(() =>
             { vm.Snapshot = s; _tray.Update(s); _window.ReassertTopmost(); }),
             log: log.Log);
 
         _cts = new CancellationTokenSource();
-        _credFile.Changed += () => _ = poller.TickAsync(_cts.Token);
+        _credFile.Changed += () => { if (_source == Sources.Api) _ = poller.TickAsync(_cts.Token); };
+        _statuslineFile.Changed += () => { if (_source == Sources.Statusline) _ = poller.TickAsync(_cts.Token); };
         _tray.RefreshNow += () => _ = poller.TickAsync(_cts.Token);
         _tray.ToggleWidget += () =>
         { if (_window.IsVisible) _window.Hide(); else _window.Show(); };
@@ -64,6 +104,18 @@ public partial class App : Application
         { _window.SetLocked(locked); store.Save(store.Load() with { Locked = locked }); };
         _tray.SkinChanged += skin =>
         { vm.Skin = skin; store.Save(store.Load() with { Skin = skin }); };
+        _tray.SourceRequested += source =>
+        {
+            if (source == _source) return;
+            if (source == Sources.Api && !ConfirmApi()) { _tray.SetSource(_source); return; }
+            _source = source;
+            store.Save(store.Load() with { Source = source });
+            _tray.SetSource(source);
+            if (source == Sources.Statusline) EnsureStatusline(silentWhenDone: false);
+            _ = poller.TickAsync(_cts.Token);
+        };
+        _tray.SetupStatusline += () => EnsureStatusline(silentWhenDone: false);
+        _tray.OpenDocs += () => Open(AppUrls.Docs);
         _tray.AutostartChanged += Autostart.Set;
         _tray.ExitApp += () => { _cts.Cancel(); Shutdown(); };
 
@@ -85,9 +137,74 @@ public partial class App : Application
         _ = updateService.RunAsync(TimeSpan.FromSeconds(10), TimeSpan.FromHours(6), _cts.Token);
     }
 
+    /// <summary>
+    /// Garante que o Claude Code chama o ClaudeWatch como statusline.
+    /// Sem statusline: configura (com backup). Já é a nossa, mas o .exe mudou de lugar: atualiza o caminho.
+    /// Há outra: não mexe, explica como encadear e copia a linha para a área de transferência.
+    /// </summary>
+    private void EnsureStatusline(bool silentWhenDone)
+    {
+        var exe = Environment.ProcessPath;
+        if (exe is null) return;
+        var (state, command) = ClaudeStatuslineSetup.Inspect(ClaudeSettings);
+        // Na inicialização de rotina, não repetir a explicação a cada vez que o app abre.
+        if (silentWhenDone && state is StatuslineState.Other or StatuslineState.Unreadable) return;
+        try
+        {
+            switch (state)
+            {
+                case StatuslineState.None:
+                    ClaudeStatuslineSetup.Install(ClaudeSettings, exe);
+                    _tray?.Notify("Statusline do Claude Code configurada. Os limites aparecem na próxima resposta do Claude Code.");
+                    break;
+                case StatuslineState.Ours when command != ClaudeStatuslineSetup.Command(exe):
+                    ClaudeStatuslineSetup.Install(ClaudeSettings, exe); // o .exe mudou de pasta
+                    break;
+                case StatuslineState.Ours:
+                    if (!silentWhenDone) _tray?.Notify("A statusline do Claude Code já é a do ClaudeWatch.");
+                    break;
+                case StatuslineState.Other:
+                    var snippet = ClaudeStatuslineSetup.BashSnippet(exe);
+                    try { Clipboard.SetText(snippet); } catch { /* área de transferência ocupada */ }
+                    MessageBox.Show(
+                        "Você já tem uma statusline no Claude Code:\n\n" + command + "\n\n" +
+                        "O ClaudeWatch não vai substituí-la. Para ele receber os limites também, coloque esta linha " +
+                        "no começo do seu script (já está na área de transferência) e use $input no lugar do stdin:\n\n" +
+                        snippet + "\n\nDetalhes em \"Como funciona…\", no menu Fonte dos dados.",
+                        "ClaudeWatch — statusline", MessageBoxButton.OK, MessageBoxImage.Information);
+                    break;
+                case StatuslineState.Unreadable:
+                    MessageBox.Show(
+                        "Não consegui ler ~/.claude/settings.json como JSON, então não mexi nele.\n\n" +
+                        "Para configurar à mão, adicione:\n\n\"statusLine\": { \"type\": \"command\", \"command\": "
+                        + System.Text.Json.JsonSerializer.Serialize(ClaudeStatuslineSetup.Command(exe)) + " }",
+                        "ClaudeWatch — statusline", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("Não consegui configurar a statusline do Claude Code: " + ex.Message,
+                "ClaudeWatch — statusline", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
+    private static bool ConfirmApi() => MessageBox.Show(
+        "A API de uso traz o limite do Fable e de onde veio o consumo, mas:\n\n" +
+        "• é um endpoint sem documentação, que pode mudar ou parar sem aviso;\n" +
+        "• o ClaudeWatch lê o token do Claude Code para chamá-lo, e os termos da Anthropic restringem " +
+        "o uso desse token fora do Claude Code.\n\nUsar mesmo assim?",
+        "ClaudeWatch — API de uso (não oficial)", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes;
+
+    private static void Open(string url)
+    {
+        try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); }
+        catch { /* sem navegador */ }
+    }
+
     protected override void OnExit(ExitEventArgs e)
     {
-        _cts?.Cancel(); _tray?.Dispose(); _credFile?.Dispose();
+        _cts?.Cancel(); _tray?.Dispose(); _credFile?.Dispose(); _statuslineFile?.Dispose();
         _showSignal?.Dispose(); _mutex?.Dispose();
         base.OnExit(e);
     }

@@ -9,17 +9,30 @@ public sealed class TrayController : IDisposable
     private System.Drawing.Icon? _current;
     private readonly ToolStripMenuItem _lock, _autostart;
     private readonly (string Key, ToolStripMenuItem Item)[] _skins;
+    private readonly ToolStripMenuItem _srcStatusline, _srcApi;
     private readonly ContextMenuStrip _menu;
     private ToolStripMenuItem? _updateItem;
     private string? _updateUrl;
     private string? _lastNotifiedVersion;
 
-    public event Action? ToggleWidget, RefreshNow, ExitApp;
+    public event Action? ToggleWidget, RefreshNow, ExitApp, SetupStatusline, OpenDocs;
+    /// <summary>A pessoa escolheu outra fonte no menu; o app confirma e chama <see cref="SetSource"/>.</summary>
+    public event Action<string>? SourceRequested;
     public event Action<bool>? LockChanged, AutostartChanged;
     public event Action<string>? SkinChanged;
 
-    public TrayController(bool locked, bool autostart, string skin)
+    public TrayController(bool locked, bool autostart, string skin, string source)
     {
+        _srcStatusline = new ToolStripMenuItem("Statusline do Claude Code (oficial)");
+        _srcApi = new ToolStripMenuItem("API de uso (não oficial, com Fable)");
+        _srcStatusline.Click += (_, _) => SourceRequested?.Invoke(Infrastructure.Sources.Statusline);
+        _srcApi.Click += (_, _) => SourceRequested?.Invoke(Infrastructure.Sources.Api);
+        var fonte = new ToolStripMenuItem("Fonte dos dados");
+        fonte.DropDownItems.AddRange([_srcStatusline, _srcApi, new ToolStripSeparator()]);
+        fonte.DropDownItems.Add("Configurar a statusline do Claude Code…", null, (_, _) => SetupStatusline?.Invoke());
+        fonte.DropDownItems.Add("Como funciona…", null, (_, _) => OpenDocs?.Invoke());
+        SetSource(source);
+
         _lock = new ToolStripMenuItem("Travar widget") { CheckOnClick = true, Checked = locked };
         _lock.CheckedChanged += (_, _) => LockChanged?.Invoke(_lock.Checked);
 
@@ -45,6 +58,7 @@ public sealed class TrayController : IDisposable
         _menu.Items.Add("Mostrar/ocultar widget", null, (_, _) => ToggleWidget?.Invoke());
         _menu.Items.Add(_lock);
         _menu.Items.Add(estilo);
+        _menu.Items.Add(fonte);
         _menu.Items.Add("Atualizar agora", null, (_, _) => RefreshNow?.Invoke());
         _menu.Items.Add(_autostart);
         _menu.Items.Add(new ToolStripSeparator());
@@ -59,6 +73,19 @@ public sealed class TrayController : IDisposable
     {
         foreach (var (key, item) in _skins) item.Checked = key == skin;
         SkinChanged?.Invoke(skin);
+    }
+
+    public void SetSource(string source)
+    {
+        _srcStatusline.Checked = source == Infrastructure.Sources.Statusline;
+        _srcApi.Checked = source == Infrastructure.Sources.Api;
+    }
+
+    public void Notify(string text)
+    {
+        _icon.BalloonTipTitle = "ClaudeWatch";
+        _icon.BalloonTipText = text;
+        _icon.ShowBalloonTip(6000);
     }
 
     public void Update(UsageSnapshot s)

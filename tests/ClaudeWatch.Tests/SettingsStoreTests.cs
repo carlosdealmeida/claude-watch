@@ -13,6 +13,7 @@ public class SettingsStoreTests
         Assert.Equal("Aneis", s.Skin);
         Assert.Equal(60, s.IntervalSeconds);
         Assert.False(s.Locked);
+        Assert.Null(s.Source); // ainda não escolhido: o app pergunta
     }
 
     [Fact]

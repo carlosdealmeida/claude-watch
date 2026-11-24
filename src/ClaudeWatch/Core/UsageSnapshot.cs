@@ -1,6 +1,13 @@
 namespace ClaudeWatch.Core;
 
-public enum SnapshotState { Ok, Stale, NoCredential }
+public enum SnapshotState
+{
+    Ok,
+    Stale,
+    NoCredential,
+    /// <summary>Fonte oficial escolhida, mas o Claude Code ainda não mandou limites pela statusline.</summary>
+    WaitingStatusline,
+}
 
 /// <summary>
 /// Um limite do plano (sessão de 5h, semana, semana de um modelo...).
