@@ -113,7 +113,7 @@
                      FontWeight="SemiBold" HorizontalAlignment="Center"/>
           <TextBlock Foreground="#A9B0B8" FontSize="11" Margin="0,6,0,0" TextWrapping="Wrap"
                      TextAlignment="Center"
-                     Text="Os limites chegam pela statusline na próxima resposta do Claude Code."/>
+                     Text="Os limites chegam pela statusline na próxima resposta do Claude Code. Se não chegarem: menu do tray › Fonte dos dados › Configurar a statusline."/>
         </StackPanel>
       </Border>
 

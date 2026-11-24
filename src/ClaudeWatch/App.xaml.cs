@@ -74,7 +74,7 @@ public partial class App : Application
         _window = new WidgetWindow(store, settings) { DataContext = vm };
         _tray = new TrayController(settings.Locked, Autostart.IsEnabled(), settings.Skin, _source);
 
-        if (settings.Source == Sources.Statusline) EnsureStatusline(silentWhenDone: !askedNow);
+        if (settings.Source == Sources.Statusline) EnsureStatusline(routine: !askedNow);
 
         var demo = Showroom.Mode is not null;
         var poller = new UsagePoller(
@@ -111,10 +111,10 @@ public partial class App : Application
             _source = source;
             store.Save(store.Load() with { Source = source });
             _tray.SetSource(source);
-            if (source == Sources.Statusline) EnsureStatusline(silentWhenDone: false);
+            if (source == Sources.Statusline) EnsureStatusline(routine: false);
             _ = poller.TickAsync(_cts.Token);
         };
-        _tray.SetupStatusline += () => EnsureStatusline(silentWhenDone: false);
+        _tray.SetupStatusline += () => EnsureStatusline(routine: false);
         _tray.OpenDocs += () => Open(AppUrls.Docs);
         _tray.AutostartChanged += Autostart.Set;
         _tray.ExitApp += () => { _cts.Cancel(); Shutdown(); };
@@ -138,32 +138,31 @@ public partial class App : Application
     }
 
     /// <summary>
-    /// Garante que o Claude Code chama o ClaudeWatch como statusline.
-    /// Sem statusline: configura (com backup). Já é a nossa, mas o .exe mudou de lugar: atualiza o caminho.
-    /// Há outra: não mexe, explica como encadear e copia a linha para a área de transferência.
+    /// Configura o Claude Code para chamar o ClaudeWatch como statusline (decisão em
+    /// <see cref="ClaudeStatuslineSetup.Plan"/>). Na <paramref name="routine"/> (o app abrindo) só
+    /// acompanha o .exe que mudou de pasta; instalar ou explicar, só quando a pessoa pede.
+    /// Há outra statusline: não mexe, explica como encadear e copia a linha para a área de transferência.
     /// </summary>
-    private void EnsureStatusline(bool silentWhenDone)
+    private void EnsureStatusline(bool routine)
     {
         var exe = Environment.ProcessPath;
         if (exe is null) return;
         var (state, command) = ClaudeStatuslineSetup.Inspect(ClaudeSettings);
-        // Na inicialização de rotina, não repetir a explicação a cada vez que o app abre.
-        if (silentWhenDone && state is StatuslineState.Other or StatuslineState.Unreadable) return;
         try
         {
-            switch (state)
+            switch (ClaudeStatuslineSetup.Plan(state, command, exe, routine))
             {
-                case StatuslineState.None:
+                case StatuslineAction.Install:
                     ClaudeStatuslineSetup.Install(ClaudeSettings, exe);
                     _tray?.Notify("Statusline do Claude Code configurada. Os limites aparecem na próxima resposta do Claude Code.");
                     break;
-                case StatuslineState.Ours when command != ClaudeStatuslineSetup.Command(exe):
+                case StatuslineAction.UpdatePath:
                     ClaudeStatuslineSetup.Install(ClaudeSettings, exe); // o .exe mudou de pasta
                     break;
-                case StatuslineState.Ours:
-                    if (!silentWhenDone) _tray?.Notify("A statusline do Claude Code já é a do ClaudeWatch.");
+                case StatuslineAction.AlreadyOurs:
+                    _tray?.Notify("A statusline do Claude Code já é a do ClaudeWatch.");
                     break;
-                case StatuslineState.Other:
+                case StatuslineAction.ExplainOther:
                     var snippet = ClaudeStatuslineSetup.BashSnippet(exe);
                     try { Clipboard.SetText(snippet); } catch { /* área de transferência ocupada */ }
                     MessageBox.Show(
@@ -173,7 +172,7 @@ public partial class App : Application
                         snippet + "\n\nDetalhes em \"Como funciona…\", no menu Fonte dos dados.",
                         "ClaudeWatch — statusline", MessageBoxButton.OK, MessageBoxImage.Information);
                     break;
-                case StatuslineState.Unreadable:
+                case StatuslineAction.ExplainUnreadable:
                     MessageBox.Show(
                         "Não consegui ler ~/.claude/settings.json como JSON, então não mexi nele.\n\n" +
                         "Para configurar à mão, adicione:\n\n\"statusLine\": { \"type\": \"command\", \"command\": "

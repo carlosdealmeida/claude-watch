@@ -1,3 +1,4 @@
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -15,6 +16,18 @@ public enum StatuslineState
     Unreadable,
 }
 
+/// <summary>O que fazer com a statusline do Claude Code, decidido por <see cref="ClaudeStatuslineSetup.Plan"/>.</summary>
+public enum StatuslineAction
+{
+    Nothing,
+    Install,
+    /// <summary>A statusline é a nossa, mas aponta para um .exe em outra pasta.</summary>
+    UpdatePath,
+    AlreadyOurs,
+    ExplainOther,
+    ExplainUnreadable,
+}
+
 /// <summary>
 /// Configura o ClaudeWatch como statusline do Claude Code em <c>~/.claude/settings.json</c>,
 /// preservando tudo o mais que estiver no arquivo e guardando um backup antes da primeira mudança.
@@ -24,7 +37,9 @@ public static class ClaudeStatuslineSetup
 {
     private static readonly JsonDocumentOptions ReadOpt = new()
     { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true };
-    private static readonly JsonSerializerOptions WriteOpt = new() { WriteIndented = true };
+    // O arquivo é da pessoa: && , > e acentos continuam literais, não viram & nem ç.
+    private static readonly JsonSerializerOptions WriteOpt = new()
+    { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
 
     public static string SettingsPath(string home) => Path.Combine(home, ".claude", "settings.json");
 
@@ -46,6 +61,22 @@ public static class ClaudeStatuslineSetup
         if (string.IsNullOrWhiteSpace(cmd)) return (StatuslineState.None, null);
         return IsOurs(cmd) ? (StatuslineState.Ours, cmd) : (StatuslineState.Other, cmd);
     }
+
+    /// <summary>
+    /// Decide o que fazer. Na <paramref name="routine"/> (o app abrindo) só acompanha o .exe que
+    /// mudou de pasta: uma statusline ausente fica ausente, porque a pessoa pode tê-la tirado de
+    /// propósito. Instalar ou explicar só quando ela pede (diálogo da fonte ou menu do tray).
+    /// </summary>
+    public static StatuslineAction Plan(StatuslineState state, string? command, string exePath, bool routine) =>
+        state switch
+        {
+            StatuslineState.Ours when command != Command(exePath) => StatuslineAction.UpdatePath,
+            _ when routine => StatuslineAction.Nothing,
+            StatuslineState.None => StatuslineAction.Install,
+            StatuslineState.Ours => StatuslineAction.AlreadyOurs,
+            StatuslineState.Other => StatuslineAction.ExplainOther,
+            _ => StatuslineAction.ExplainUnreadable,
+        };
 
     public static bool IsOurs(string command) =>
         command.Contains("ClaudeWatch", StringComparison.OrdinalIgnoreCase)

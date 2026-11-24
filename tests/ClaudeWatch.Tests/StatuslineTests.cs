@@ -138,6 +138,38 @@ public class ClaudeStatuslineSetupTests
     }
 
     [Fact]
+    public void Instalar_nao_escapa_o_texto_do_resto_do_arquivo()
+    {
+        // Quem abrir o settings.json depois tem de reconhecer o que escreveu: && e acentos
+        // continuam literais, não viram & nem ç.
+        var path = Settings("""
+        {
+          "hooks": { "Stop": [{ "hooks": [{ "type": "command", "command": "git add -A && echo ação > log.txt" }] }] }
+        }
+        """);
+        ClaudeStatuslineSetup.Install(path, Exe);
+        var texto = File.ReadAllText(path);
+        Assert.Contains("git add -A && echo ação > log.txt", texto);
+    }
+
+    [Theory]
+    // Ao abrir o app (rotina): só acompanha o .exe que mudou de pasta. Statusline ausente
+    // fica ausente — a pessoa pode tê-la tirado de propósito.
+    [InlineData(StatuslineState.None, null, true, StatuslineAction.Nothing)]
+    [InlineData(StatuslineState.Ours, "\"C:/velho/ClaudeWatch.exe\" --statusline", true, StatuslineAction.UpdatePath)]
+    [InlineData(StatuslineState.Ours, "\"C:/Users/carlos/Apps/ClaudeWatch.exe\" --statusline", true, StatuslineAction.Nothing)]
+    [InlineData(StatuslineState.Other, "meu.sh", true, StatuslineAction.Nothing)]
+    [InlineData(StatuslineState.Unreadable, null, true, StatuslineAction.Nothing)]
+    // Pedido explícito (diálogo ou menu): instala, ou explica por que não.
+    [InlineData(StatuslineState.None, null, false, StatuslineAction.Install)]
+    [InlineData(StatuslineState.Ours, "\"C:/velho/ClaudeWatch.exe\" --statusline", false, StatuslineAction.UpdatePath)]
+    [InlineData(StatuslineState.Ours, "\"C:/Users/carlos/Apps/ClaudeWatch.exe\" --statusline", false, StatuslineAction.AlreadyOurs)]
+    [InlineData(StatuslineState.Other, "meu.sh", false, StatuslineAction.ExplainOther)]
+    [InlineData(StatuslineState.Unreadable, null, false, StatuslineAction.ExplainUnreadable)]
+    public void Plano_da_statusline(StatuslineState state, string? command, bool routine, StatuslineAction esperado) =>
+        Assert.Equal(esperado, ClaudeStatuslineSetup.Plan(state, command, Exe, routine));
+
+    [Fact]
     public void Nunca_substitui_a_statusline_de_outra_ferramenta()
     {
         var original = """{"statusLine":{"type":"command","command":"~/.claude/statusline.sh"}}""";
