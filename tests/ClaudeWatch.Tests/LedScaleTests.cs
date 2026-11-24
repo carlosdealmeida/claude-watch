@@ -15,4 +15,20 @@ public class LedScaleTests
         Assert.Equal(Zone.Ambar, s[10].Zone);    // centro 70.0
         Assert.Equal(Zone.Vermelho, s[13].Zone); // centro 90.0
     }
+
+    [Fact]
+    public void Com_aviso_de_ritmo_o_verde_vira_ambar()
+    {
+        // Fable 18% acabando antes do reset: os LEDs acompanham o âmbar do texto
+        var s = LedScale.Build(18, warn: true);
+        Assert.All(s.Where(x => x.Lit), x => Assert.Equal(Zone.Ambar, x.Zone));
+    }
+
+    [Fact]
+    public void Com_aviso_de_ritmo_o_vermelho_continua_vermelho()
+    {
+        var s = LedScale.Build(100, warn: true);
+        Assert.Equal(Zone.Ambar, s[0].Zone);
+        Assert.Equal(Zone.Vermelho, s[13].Zone);
+    }
 }

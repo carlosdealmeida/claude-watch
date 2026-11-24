@@ -20,24 +20,30 @@
 </p>
 
 <p align="center">
-  <img src="assets/aneis.png" alt="Rings skin" width="330">
+  <img src="assets/aneis.png" alt="Rings style" width="300">
   &nbsp;&nbsp;
-  <img src="assets/led.png" alt="LED skin" width="330">
+  <img src="assets/barras.png" alt="Bars style" width="300">
+</p>
+<p align="center">
+  <img src="assets/led.png" alt="LED style" width="300">
+  &nbsp;&nbsp;
+  <img src="assets/compacto.png" alt="Compact style" width="350">
 </p>
 
-<p align="center"><sub>The two styles: <b>Rings</b> and <b>LED</b> · 🟢 &lt;70% · 🟠 70–89% · 🔴 ≥90%</sub></p>
+<p align="center"><sub>The four styles: <b>Rings</b>, <b>Bars</b>, <b>LED</b> and <b>Compact</b> · 🟢 &lt;70% · 🟠 70–89% or runs out before the reset · 🔴 ≥90%</sub></p>
 
 **ClaudeWatch** shows, in real time and at a glance, how much of your Claude limits you've used:
 
-- ⏱️ **5-hour session**
-- 📅 **Weekly**
-- 🧠 **Weekly Sonnet**
+- 📅 **Weekly**, the limit every plan has
+- ✨ **Per-model limits**, such as the weekly **Fable** limit
+- ⏱️ **5-hour session**, on plans that still have it (verified Ultra accounts don't, and the card hides it)
 
 …in a sleek floating card and a colored icon next to your clock. It reads the credential from the **Claude Code** you already have installed — and **never modifies it**.
 
 ## ✨ Features
 
-- 🎨 Two styles: **Rings** and **LED** — switch with one click
+- 🎨 Four styles, picked from the tray menu: **Rings** (concentric, the critical limit in the center), **Bars** (with the Fable share inside the weekly bar), **Compact** (a pill; details open on hover) and **LED**
+- 🧭 **Pace**: if a limit would run out before it resets at the current rate, the card warns in amber — `⚠ acaba dom 01:16`; otherwise it shows when it resets — `↻ seg 09:00`
 - 🔢 Tray icon showing the most critical meter, colored by zone
 - 🚦 Color by level: 🟢 green (&lt;70%) · 🟠 amber (70–89%) · 🔴 red (≥90%)
 - 📌 Always on top, draggable, with a **locked** mode (click-through, stays out of your way)
@@ -95,6 +101,8 @@ Every few hours the app checks for a new version and notifies you via the tray i
 ## 🛠️ For developers
 
 Built with **.NET 10 + WPF**. Build with `dotnet build ClaudeWatch.slnx` and run the tests with `dotnet test ClaudeWatch.slnx`.
+
+The screenshots above come from `tools\capturar-estilos.cmd -Assets`: the script opens the app in demo mode (`CLAUDEWATCH_SHOWROOM`, no real data), captures each style over a plain background and updates `assets/`. Build in Release first.
 
 Released under the [MIT](LICENSE) license.
 

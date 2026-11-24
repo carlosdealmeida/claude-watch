@@ -4,14 +4,36 @@
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         Topmost="True" ShowInTaskbar="False" ResizeMode="NoResize"
         SizeToContent="WidthAndHeight" ShowActivated="False">
-  <Border CornerRadius="12" Background="#CC1E1E1E"
-          BorderBrush="#1AFFFFFF" BorderThickness="1" Padding="14,14,14,12"
+  <Border Background="#CC1E1E1E" BorderBrush="#1AFFFFFF" BorderThickness="1"
           MouseLeftButtonDown="OnDragStart">
+    <Border.Style>
+      <Style TargetType="Border">
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="14,14,14,12"/>
+        <Style.Triggers>
+          <!-- Compacto: pílula -->
+          <DataTrigger Binding="{Binding Skin}" Value="Compacto">
+            <Setter Property="CornerRadius" Value="18"/>
+            <Setter Property="Padding" Value="14,8"/>
+          </DataTrigger>
+        </Style.Triggers>
+      </Style>
+    </Border.Style>
     <Border.Effect>
       <DropShadowEffect BlurRadius="34" ShadowDepth="6" Direction="270" Opacity="0.4"/>
     </Border.Effect>
 
-    <Grid MinWidth="236">
+    <Grid>
+      <Grid.Style>
+        <Style TargetType="Grid">
+          <Setter Property="MinWidth" Value="236"/>
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding Skin}" Value="Compacto">
+              <Setter Property="MinWidth" Value="0"/>
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </Grid.Style>
       <!-- Corpo (skins) + rodapé de estado Stale -->
       <StackPanel>
         <ContentControl x:Name="Body" Content="{Binding}">
@@ -22,6 +44,12 @@
                 <DataTrigger Binding="{Binding Skin}" Value="Led">
                   <Setter Property="ContentTemplate" Value="{StaticResource SkinLed}"/>
                 </DataTrigger>
+                <DataTrigger Binding="{Binding Skin}" Value="Barras">
+                  <Setter Property="ContentTemplate" Value="{StaticResource SkinBarras}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Skin}" Value="Compacto">
+                  <Setter Property="ContentTemplate" Value="{StaticResource SkinCompacto}"/>
+                </DataTrigger>
                 <!-- aproximação consciente do grayscale CSS: esmaecer quando Stale -->
                 <DataTrigger Binding="{Binding Snapshot.State}" Value="Stale">
                   <Setter Property="Opacity" Value="0.55"/>
@@ -30,12 +58,6 @@
             </Style>
           </ContentControl.Style>
         </ContentControl>
-
-        <!-- Reset da sessão de 5h: some quando não há ResetAt -->
-        <TextBlock FontSize="10.5" Margin="0,8,0,0" HorizontalAlignment="Center"
-                   Foreground="#8CFFFFFF"
-                   Text="{Binding Snapshot.FiveHour.ResetAt, Converter={StaticResource LocalHhmm}, StringFormat='↻ reseta às {0}'}"
-                   Visibility="{Binding Snapshot.FiveHour.ResetAt, Converter={StaticResource NullToCollapsed}}"/>
 
         <TextBlock FontSize="10.5" Margin="0,8,0,0" HorizontalAlignment="Center">
           <TextBlock.Style>
@@ -49,6 +71,10 @@
                 </Setter.Value>
               </Setter>
               <Style.Triggers>
+                <!-- no Compacto o "atualizado às" fica no detalhe do hover -->
+                <DataTrigger Binding="{Binding Skin}" Value="Compacto">
+                  <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
                 <!-- dado velho: vira âmbar com aviso -->
                 <DataTrigger Binding="{Binding Snapshot.State}" Value="Stale">
                   <Setter Property="Foreground" Value="#E8A23D"/>

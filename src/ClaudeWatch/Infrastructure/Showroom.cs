@@ -3,9 +3,12 @@ using ClaudeWatch.Core;
 namespace ClaudeWatch.Infrastructure;
 
 /// <summary>
-/// Modo demo opt-in (env var CLAUDEWATCH_SHOWROOM=ok|stale|nocred): injeta o
-/// snapshot canônico 42/78/96 sem tocar a rede, para QA visual dos skins/estados
+/// Modo demo opt-in (env var CLAUDEWATCH_SHOWROOM=ok|stale|nocred|ultra): injeta um
+/// snapshot fixo sem tocar a rede, para QA visual dos skins/estados
 /// e para tirar screenshots sem expor o uso real. Default: off.
+///
+/// - ok: plano com sessão de 5h (Max) — 5h 42%, Semana 78%, Fable 96%
+/// - ultra: Ultra verificado, sem sessão de 5h — Semana 12%, Fable 18% acabando antes do reset
 /// </summary>
 public static class Showroom
 {
@@ -13,14 +16,35 @@ public static class Showroom
 
     public static UsageSnapshot Snapshot() => Mode?.ToLowerInvariant() switch
     {
-        "stale" => Demo(SnapshotState.Stale),
-        "nocred" => Demo(SnapshotState.NoCredential),
-        _ => Demo(SnapshotState.Ok),
+        "stale" => Max(SnapshotState.Stale),
+        "nocred" => Max(SnapshotState.NoCredential),
+        "ultra" => Ultra(),
+        _ => Max(SnapshotState.Ok),
     };
 
-    private static UsageSnapshot Demo(SnapshotState state) => new(
-        new Meter("Sessão 5h", 42, DateTimeOffset.Now.AddHours(2)),
-        new Meter("Semana", 78, DateTimeOffset.Now.AddDays(3)),
-        new Meter("Sonnet", 96, DateTimeOffset.Now.AddDays(3)),
-        DateTimeOffset.UtcNow, state);
+    private static UsageSnapshot Max(SnapshotState state)
+    {
+        var now = DateTimeOffset.Now;
+        return Build(now, state,
+            new Meter("Sessão 5h", 42, now.AddHours(2)) { Key = "five_hour", Short = "5h", WindowStart = now.AddHours(-3) },
+            new Meter("Semana", 78, now.AddDays(3))
+            { Key = "weekly_all", Short = "Sem", WindowStart = now.AddDays(-4), Part = 39, PartCap = 50, PartLabel = "Fable" },
+            new Meter("Fable", 96, now.AddDays(3)) { Key = "weekly_scoped:fable", Short = "Fable", WindowStart = now.AddDays(-4) });
+    }
+
+    private static UsageSnapshot Ultra()
+    {
+        var now = DateTimeOffset.Now;
+        var start = now.AddDays(-1);
+        return Build(now, SnapshotState.Ok,
+            new Meter("Semana", 12, start.AddDays(7))
+            { Key = "weekly_all", Short = "Sem", WindowStart = start, Part = 9, PartCap = 50, PartLabel = "Fable" },
+            new Meter("Fable", 18, start.AddDays(7)) { Key = "weekly_scoped:fable", Short = "Fable", WindowStart = start });
+    }
+
+    private static UsageSnapshot Build(DateTimeOffset now, SnapshotState state, params Meter[] meters) =>
+        new(meters.Select(m => MeterHints.Annotate(m, now, TimeZoneInfo.Local)).ToList(), now, state)
+        {
+            Breakdown = [new BreakdownRow("Claude Code", 92), new BreakdownRow("Cowork", 8)],
+        };
 }
