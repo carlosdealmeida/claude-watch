@@ -487,3 +487,6 @@ publish/
 
 # Documentacao interna (nao publicar no GitHub)
 docs/
+
+# Worktrees criadas pelo ClaudeForge
+.worktrees/
