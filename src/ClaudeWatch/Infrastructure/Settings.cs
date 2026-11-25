@@ -11,6 +11,9 @@ public sealed record Settings
     public int IntervalSeconds { get; init; } = 60;
     public string? WslCredentialsPath { get; init; }
 
+    /// <summary>Avisa pelo Windows ao passar de 70%/90%, esgotar ou o ritmo acabar antes do reset.</summary>
+    public bool Alerts { get; init; } = true;
+
     /// <summary>
     /// De onde vêm os limites: <c>"statusline"</c> (oficial, pela statusline do Claude Code)
     /// ou <c>"api"</c> (endpoint não oficial, com o limite do Fable). Nulo: ainda não escolhido.

@@ -44,6 +44,7 @@
 
 - 🎨 Cuatro estilos, elegidos en el menú de la bandeja: **Anillos** (concéntricos, el límite crítico en el centro), **Barras** (con la parte de Fable dentro de la semanal), **Compacto** (una píldora; el detalle se abre al pasar el ratón) y **LED**
 - 🧭 **Ritmo**: si al ritmo actual un límite se agota antes del reinicio, la tarjeta avisa en ámbar — `⚠ acaba dom 01:16`; si no, muestra cuándo se reinicia — `↻ seg 09:00`, o cuánto falta cuando es en menos de 24h — `↻ em 2h13`, con la cuenta regresiva avanzando sola cada minuto
+- 🔔 **Avisos sin mirar**: una notificación de Windows cuando un límite pasa del 70% o del 90%, se agota, o el ritmo dice que se agota antes del reinicio. Cada aviso sale una vez por ventana y vuelve a valer tras el reinicio; se activa y desactiva en **Avisar perto do limite**, en el menú del tray. El sonido sigue la configuración de notificaciones de Windows
 - 🔢 Icono en la bandeja con el medidor más crítico, según el color de la zona
 - 🚦 Color por nivel: 🟢 verde (&lt;70%) · 🟠 ámbar (70–89%) · 🔴 rojo (≥90%)
 - 📌 Siempre visible, arrastrable, con modo **bloqueado** (clic a través, no estorba)
