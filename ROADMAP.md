@@ -6,6 +6,11 @@ O acompanhamento detalhado de cada item está nas [issues](https://github.com/ca
 
 ## ✅ Entregue
 
+### v0.6.0 — Aviso antecipado
+Funciona com as duas fontes, inclusive a oficial. **Avisos do Windows** sem precisar olhar o widget ([#1](https://github.com/carlosdealmeida/claude-watch/issues/1)): quando um limite passa de 70% ou de 90%, esgota, ou o ritmo diz que acaba antes do reset — que no Ultra aparece muito antes dos 70%. Cada aviso sai uma vez por janela e volta a valer no reset; liga e desliga no tray. Responde à dor nº 1, ser pego de surpresa pelo limite (claude-code#16157, #38335, #45756, #41788, #9424).
+
+**Contagem regressiva do reset** ([#2](https://github.com/carlosdealmeida/claude-watch/issues/2)): faltando menos de 24h, `↻ seg 09:00` vira `↻ em 2h13` (e `esgotado · volta em 2h13`), contando sozinha de minuto em minuto, também no tooltip do tray e na statusline (claude-code#6679, #3626, #4267, #13354).
+
 ### v0.5.0 — Fonte oficial e documentação dos limites
 A fonte padrão passa a ser a **statusline do Claude Code**, o caminho documentado: o ClaudeWatch vira a statusline, grava só os limites e não toca no token. A API de uso continua disponível como opção, com aviso. Nova documentação em [LIMITES.md](LIMITES.md), com o formato das duas fontes, a conta do ritmo e receitas de statusline.
 
@@ -19,13 +24,6 @@ Linha `↻ reseta às HH:mm` no rodapé do cartão (ambos os skins), some quando
 
 ### v0.2.0 / v0.1.0 — Base
 Widget flutuante, ícone no tray com o medidor mais crítico, dois skins (Anéis e LED), zonas por cor, leitura da credencial do Claude Code, aviso de nova versão, single-file `.exe`.
-
-## 🎯 v0.6 — Aviso antecipado
-
-Funciona com as duas fontes, inclusive a oficial: só precisa do percentual e do horário do reset.
-
-- **[#2](https://github.com/carlosdealmeida/claude-watch/issues/2) — Contagem regressiva do reset.** `↻ em 2h13` quando falta menos de 24h (mais longe, `↻ seg 09:00`), atualizando sozinha de minuto em minuto. O reset semanal e o ritmo já saíram na v0.4.0 (claude-code#6679, #3626, #4267, #13354).
-- **[#1](https://github.com/carlosdealmeida/claude-watch/issues/1) — Notificação proativa ao cruzar zona.** Notificação do Windows quando um medidor passa de 70% / 90%, esgota ou o ritmo diz que acaba antes do reset; uma vez por janela, liga/desliga no tray. Responde à dor nº 1: ser pego de surpresa pelo limite (claude-code#16157, #38335, #45756, #41788, #9424).
 
 ## 🎯 v0.7 — Pela API de uso
 
