@@ -163,7 +163,7 @@ decorrido = agora − início_da_janela
 acaba_em  = agora + decorrido × (100 − uso) / uso
 ```
 
-A conta supõe que você continua no mesmo ritmo médio da janela até agora. Se `acaba_em` cai **antes** do reset, o limite acaba antes, e o ClaudeWatch mostra `⚠ acaba dom 01:16` em âmbar. Se cai depois, mostra quando reseta: `↻ seg 09:00`.
+A conta supõe que você continua no mesmo ritmo médio da janela até agora. Se `acaba_em` cai **antes** do reset, o limite acaba antes, e o ClaudeWatch mostra `⚠ acaba dom 01:16` em âmbar. Se cai depois, mostra quando reseta: `↻ seg 09:00`, ou, faltando menos de 24h, quanto falta: `↻ em 2h13` (e `esgotado · volta em 2h13`). A contagem arredonda para cima e anda de minuto em minuto, mesmo sem leitura nova. O `⚠ acaba` fica sempre no horário: é uma projeção, e "em 3h" daria a ela uma precisão que não tem.
 
 **Exemplo real.** A semana começou na segunda às 09:00 e agora é terça às 09:31, ou seja, 24,5 h decorridas. O Fable está em 18%:
 

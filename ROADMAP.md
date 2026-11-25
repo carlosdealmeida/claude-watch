@@ -24,7 +24,7 @@ Widget flutuante, ícone no tray com o medidor mais crítico, dois skins (Anéis
 
 Funciona com as duas fontes, inclusive a oficial: só precisa do percentual e do horário do reset.
 
-- **[#2](https://github.com/carlosdealmeida/claude-watch/issues/2) — Contagem regressiva do reset.** `↻ seg 09:00 (em 2h13)`, atualizando sozinha. O reset semanal e o ritmo já saíram na v0.4.0 (claude-code#6679, #3626, #4267, #13354).
+- **[#2](https://github.com/carlosdealmeida/claude-watch/issues/2) — Contagem regressiva do reset.** `↻ em 2h13` quando falta menos de 24h (mais longe, `↻ seg 09:00`), atualizando sozinha de minuto em minuto. O reset semanal e o ritmo já saíram na v0.4.0 (claude-code#6679, #3626, #4267, #13354).
 - **[#1](https://github.com/carlosdealmeida/claude-watch/issues/1) — Notificação proativa ao cruzar zona.** Toast do Windows (+ som opcional) quando um medidor cruza 70% / 90%, disparado só na transição. Responde à dor nº 1: ser pego de surpresa pelo limite (claude-code#16157, #38335, #45756, #41788, #9424).
 
 ## 🎯 v0.7 — Pela API de uso

@@ -92,7 +92,7 @@ public sealed class TrayController : IDisposable
     {
         var next = IconRenderer.Render(s.Critical);
         _icon.Icon = next;
-        _icon.Text = TooltipFormatter.Format(s);
+        _icon.Text = TooltipFormatter.Format(s, now: DateTimeOffset.Now);
         _current?.Dispose();
         _current = next;
     }

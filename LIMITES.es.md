@@ -163,7 +163,7 @@ transcurrido = ahora − inicio_de_la_ventana
 se_agota     = ahora + transcurrido × (100 − uso) / uso
 ```
 
-La cuenta supone que sigues al mismo ritmo medio de la ventana hasta ahora. Si `se_agota` cae **antes** del reinicio, el límite se agota antes, y ClaudeWatch muestra `⚠ acaba dom 01:16` (se agota el dom 01:16) en ámbar. Si cae después, muestra cuándo se reinicia: `↻ seg 09:00` (lun 09:00).
+La cuenta supone que sigues al mismo ritmo medio de la ventana hasta ahora. Si `se_agota` cae **antes** del reinicio, el límite se agota antes, y ClaudeWatch muestra `⚠ acaba dom 01:16` (se agota el dom 01:16) en ámbar. Si cae después, muestra cuándo se reinicia: `↻ seg 09:00` (lun 09:00), o, si faltan menos de 24h, cuánto falta: `↻ em 2h13` (en 2h13; también `esgotado · volta em 2h13`, agotado · vuelve en 2h13). La cuenta redondea hacia arriba y avanza cada minuto, aunque no haya lectura nueva. `⚠ acaba` siempre queda en la hora: es una proyección, y "en 3h" le daría una precisión que no tiene.
 
 **Ejemplo real.** La semana empezó el lunes a las 09:00 y ahora es martes a las 09:31: han pasado 24,5 h. Fable está al 18%:
 

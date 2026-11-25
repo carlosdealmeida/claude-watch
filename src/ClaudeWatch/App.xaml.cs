@@ -91,8 +91,17 @@ public partial class App : Application
                           _statuslineFile.ReadOrNull() ?? throw new FileNotFoundException(StatuslineBridge.DataPath),
                           DateTimeOffset.Now)),
             publish: s => Dispatcher.Invoke(() =>
-            { vm.Snapshot = s; _tray.Update(s); _window.ReassertTopmost(); }),
+            { Show(MeterHints.Refresh(s, DateTimeOffset.Now, TimeZoneInfo.Local)); _window.ReassertTopmost(); }),
             log: log.Log);
+
+        void Show(UsageSnapshot s) { vm.Snapshot = s; _tray.Update(s); }
+
+        // A contagem do reset ("em 2h13") anda de minuto em minuto mesmo sem leitura nova:
+        // com intervalo maior, com o backoff depois de uma falha ou esperando o Claude Code.
+        var clock = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMinutes(1) };
+        clock.Tick += (_, _) =>
+        { if (vm.Snapshot is { } s) Show(MeterHints.Refresh(s, DateTimeOffset.Now, TimeZoneInfo.Local)); };
+        clock.Start();
 
         _cts = new CancellationTokenSource();
         _credFile.Changed += () => { if (_source == Sources.Api) _ = poller.TickAsync(_cts.Token); };
