@@ -44,6 +44,7 @@
 
 - 🎨 Four styles, picked from the tray menu: **Rings** (concentric, the critical limit in the center), **Bars** (with the Fable share inside the weekly bar), **Compact** (a pill; details open on hover) and **LED**
 - 🧭 **Pace**: if a limit would run out before it resets at the current rate, the card warns in amber — `⚠ acaba dom 01:16`; otherwise it shows when it resets — `↻ seg 09:00`, or how long until it does when that's under 24h — `↻ em 2h13`, counting down by itself every minute
+- 🔔 **Alerts without looking**: a Windows notification when a limit passes 70% or 90%, runs out, or its pace says it runs out before the reset. Each alert fires once per window and re-arms after the reset; toggle it with **Avisar perto do limite** in the tray menu. Sound follows Windows notification settings
 - 🔢 Tray icon showing the most critical meter, colored by zone
 - 🚦 Color by level: 🟢 green (&lt;70%) · 🟠 amber (70–89%) · 🔴 red (≥90%)
 - 📌 Always on top, draggable, with a **locked** mode (click-through, stays out of your way)

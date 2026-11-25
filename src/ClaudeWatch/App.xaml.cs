@@ -72,7 +72,9 @@ public partial class App : Application
 
         var vm = new WidgetViewModel { Skin = settings.Skin };
         _window = new WidgetWindow(store, settings) { DataContext = vm };
-        _tray = new TrayController(settings.Locked, Autostart.IsEnabled(), settings.Skin, _source);
+        _tray = new TrayController(settings.Locked, Autostart.IsEnabled(), settings.Skin, _source, settings.Alerts);
+        var alerts = new UsageAlerts();
+        var alertsOn = settings.Alerts;
 
         if (settings.Source == Sources.Statusline) EnsureStatusline(routine: !askedNow);
 
@@ -94,7 +96,15 @@ public partial class App : Application
             { Show(MeterHints.Refresh(s, DateTimeOffset.Now, TimeZoneInfo.Local)); _window.ReassertTopmost(); }),
             log: log.Log);
 
-        void Show(UsageSnapshot s) { vm.Snapshot = s; _tray.Update(s); }
+        void Show(UsageSnapshot s)
+        {
+            vm.Snapshot = s;
+            _tray.Update(s);
+            // Confere sempre, mesmo com os avisos desligados: ao religar, não sai o que já passou.
+            var msgs = alerts.Check(s, DateTimeOffset.Now, TimeZoneInfo.Local);
+            if (alertsOn && msgs.Count > 0)
+                _tray.Notify(string.Join("\n", msgs), "Limite do Claude", System.Windows.Forms.ToolTipIcon.Warning);
+        }
 
         // A contagem do reset ("em 2h13") anda de minuto em minuto mesmo sem leitura nova:
         // com intervalo maior, com o backoff depois de uma falha ou esperando o Claude Code.
@@ -109,6 +119,9 @@ public partial class App : Application
         _tray.RefreshNow += () => _ = poller.TickAsync(_cts.Token);
         _tray.ToggleWidget += () =>
         { if (_window.IsVisible) _window.Hide(); else _window.Show(); };
+        _tray.ShowWidget += () => { _window.Show(); _window.ReassertTopmost(); };
+        _tray.AlertsChanged += on =>
+        { alertsOn = on; store.Save(store.Load() with { Alerts = on }); };
         _tray.LockChanged += locked =>
         { _window.SetLocked(locked); store.Save(store.Load() with { Locked = locked }); };
         _tray.SkinChanged += skin =>

@@ -7,7 +7,8 @@ public sealed class TrayController : IDisposable
 {
     private readonly NotifyIcon _icon;
     private System.Drawing.Icon? _current;
-    private readonly ToolStripMenuItem _lock, _autostart;
+    private readonly ToolStripMenuItem _lock, _autostart, _alerts;
+    private bool _balloonIsUpdate;
     private readonly (string Key, ToolStripMenuItem Item)[] _skins;
     private readonly ToolStripMenuItem _srcStatusline, _srcApi;
     private readonly ContextMenuStrip _menu;
@@ -15,14 +16,17 @@ public sealed class TrayController : IDisposable
     private string? _updateUrl;
     private string? _lastNotifiedVersion;
 
-    public event Action? ToggleWidget, RefreshNow, ExitApp, SetupStatusline, OpenDocs;
+    public event Action? ToggleWidget, ShowWidget, RefreshNow, ExitApp, SetupStatusline, OpenDocs;
     /// <summary>A pessoa escolheu outra fonte no menu; o app confirma e chama <see cref="SetSource"/>.</summary>
     public event Action<string>? SourceRequested;
-    public event Action<bool>? LockChanged, AutostartChanged;
+    public event Action<bool>? LockChanged, AutostartChanged, AlertsChanged;
     public event Action<string>? SkinChanged;
 
-    public TrayController(bool locked, bool autostart, string skin, string source)
+    public TrayController(bool locked, bool autostart, string skin, string source, bool alerts)
     {
+        _alerts = new ToolStripMenuItem("Avisar perto do limite") { CheckOnClick = true, Checked = alerts };
+        _alerts.CheckedChanged += (_, _) => AlertsChanged?.Invoke(_alerts.Checked);
+
         _srcStatusline = new ToolStripMenuItem("Statusline do Claude Code (oficial)");
         _srcApi = new ToolStripMenuItem("API de uso (não oficial, com Fable)");
         _srcStatusline.Click += (_, _) => SourceRequested?.Invoke(Infrastructure.Sources.Statusline);
@@ -60,13 +64,15 @@ public sealed class TrayController : IDisposable
         _menu.Items.Add(estilo);
         _menu.Items.Add(fonte);
         _menu.Items.Add("Atualizar agora", null, (_, _) => RefreshNow?.Invoke());
+        _menu.Items.Add(_alerts);
         _menu.Items.Add(_autostart);
         _menu.Items.Add(new ToolStripSeparator());
         _menu.Items.Add("Sair", null, (_, _) => ExitApp?.Invoke());
 
         _icon = new NotifyIcon { Visible = true, ContextMenuStrip = _menu, Text = "ClaudeWatch" };
         _icon.DoubleClick += (_, _) => ToggleWidget?.Invoke();
-        _icon.BalloonTipClicked += (_, _) => OpenUpdateUrl();
+        // O clique no balão segue o que ele dizia: o de versão nova abre o download, os outros o widget.
+        _icon.BalloonTipClicked += (_, _) => { if (_balloonIsUpdate) OpenUpdateUrl(); else ShowWidget?.Invoke(); };
     }
 
     private void SelectSkin(string skin)
@@ -81,9 +87,11 @@ public sealed class TrayController : IDisposable
         _srcApi.Checked = source == Infrastructure.Sources.Api;
     }
 
-    public void Notify(string text)
+    public void Notify(string text, string title = "ClaudeWatch", ToolTipIcon icon = ToolTipIcon.None)
     {
-        _icon.BalloonTipTitle = "ClaudeWatch";
+        _balloonIsUpdate = false;
+        _icon.BalloonTipIcon = icon;
+        _icon.BalloonTipTitle = title;
         _icon.BalloonTipText = text;
         _icon.ShowBalloonTip(6000);
     }
@@ -113,6 +121,8 @@ public sealed class TrayController : IDisposable
         if (_lastNotifiedVersion != version) // balão só uma vez por versão
         {
             _lastNotifiedVersion = version;
+            _balloonIsUpdate = true;
+            _icon.BalloonTipIcon = ToolTipIcon.None;
             _icon.BalloonTipTitle = "ClaudeWatch";
             _icon.BalloonTipText = $"Versão {version} disponível — clique para baixar";
             _icon.ShowBalloonTip(5000);
